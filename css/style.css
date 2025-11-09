@@ -479,3 +479,28 @@ a{color:inherit;text-decoration:none}
 .product-page .title{ font-size:1.4rem; margin-top:10px; }
 .product-page .price{ font-weight:700; margin-top:6px; }
 .product-page .desc{ color:#473a31; margin-top:8px; line-height:1.5; }
+#productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0px 4px 18px rgba(0,0,0,0.07);
+  transition: 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.ph {
+  width: 100%;
+  height: 160px;
+  border-radius: 12px;
+  background-color: #eee;
+}
