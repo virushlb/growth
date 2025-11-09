@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>growth — products</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="assets/logo.png" type="image/png"/>
+</head>
+
+<body>
+<header class="nav">
+  <a class="brand" href="index.html">growth</a>
+  <nav class="links">
+    <a class="active" href="products.html">Products</a>
+    <a href="index.html#about">About</a>
+  </nav>
+  <div class="cart" style="margin-right:12px;">
+    <a href="cart.html" title="Cart">
+      <img src="assets/basket.png" alt="cart"/>
+      <span id="cartCount" class="badge">0</span>
+    </a>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="page-title">Products</h1>
+  <div id="productGrid" class="grid"></div>
+  <p id="loading">Loading products...</p>
+</main>
+
+<footer class="footer">
+  <small>© <span id="year"></span> growth.lbb</small>
+</footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function loadProducts() {
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, name, price, category, image_url, stock")
+    .order("created_at", { ascending: false });
+
+  const grid = document.getElementById("productGrid");
+  document.getElementById("loading").style.display = "none";
+
+  if (error) {
+    console.error(error);
+    grid.innerHTML = "<p>Failed to load products.</p>";
+    return;
+  }
+
+  const items = (data || []).map(p => ({ ...p, stock: Number(p.stock ?? 0) }));
+
+  grid.innerHTML = items.map(p => `
+    <article class="card">
+      <div class="ph" style="background-image:url('${p.image_url}'); background-size:cover; background-position:center;"></div>
+
+      ${p.stock <= 0 ? `<div class="oos-badge">Out of Stock</div>` : ``}
+
+      <h4>${p.name}</h4>
+      <p class="price">$${p.price}</p>
+
+      <div class="actions">
+        ${p.stock > 0 
+          ? `
+            <button class="add" data-name="${p.name}" data-price="${p.price}">
+              <img src="assets/add-to-cart.png" alt=""> Add to cart
+            </button>
+            <a class="mini-btn" href="cart.html">Order</a>
+          `
+          : `
+            <button class="mini-btn disabled" disabled>Unavailable</button>
+          `
+        }
+      </div>
+    </article>
+  `).join("");
+
+  setupCartButtons();
+}
+
+function setupCartButtons(){
+  function load(){ try{return JSON.parse(localStorage.getItem("growth_cart")||"[]")}catch(e){return []} }
+  function save(arr){ localStorage.setItem("growth_cart",JSON.stringify(arr)); document.getElementById("cartCount").textContent = arr.length; }
+
+  document.querySelectorAll(".add").forEach(btn=>{
+    btn.addEventListener("click",function(){
+      const cart = load();
+      cart.push({name:this.dataset.name,price:+this.dataset.price,qty:1});
+      save(cart);
+      this.textContent="Added ✓";
+      setTimeout(()=>{this.innerHTML='<img src="assets/add-to-cart.png" alt="">Add to cart'},1200);
+    });
+  });
+
+  save(load());
+}
+
+loadProducts();
+</script>
+
+</body>
+</html>

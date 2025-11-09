@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>growth — order</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="assets/logo.png" type="image/png"/>
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="index.html">growth</a>
+    <nav class="links">
+      <a href="products.html">Products</a>
+      <a class="active" href="order.html">Order</a>
+      <a href="index.html#about">About</a>
+    </nav>
+    <div class="cart" style="margin-right:12px;">
+    <a href="order.html" title="Cart">
+      <img src="assets/basket.png" alt="cart"/>
+      <span id="cartCount" class="badge">0</span>
+    </a>
+  </div>
+</header>
+
+  <main class="container">
+    <h1 class="page-title">order</h1>
+    <form id="orderForm" class="form">
+      <label>Product
+        <input id="product" name="product" placeholder="e.g., Cozy Socks — Brown">
+      </label>
+      <label>Your name
+        <input id="name" name="name" placeholder="Full name">
+      </label>
+      <label>Phone (WhatsApp)
+        <input id="phone" name="phone" placeholder="+961 71 209 028">
+      </label>
+      <label>Notes (optional)
+        <textarea id="notes" name="notes" rows="3" placeholder="size, color, delivery area"></textarea>
+      </label>
+      <button class="cta" type="submit">Send on WhatsApp</button>
+    </form>
+  </main>
+
+  <footer class="footer">
+    <small>© <span id="year"></span> growth.lbb</small>
+  </footer>
+
+ <script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Get product ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+const productId = urlParams.get("id");
+
+const form = document.querySelector("#orderForm");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.querySelector("#name").value.trim();
+  const phone = document.querySelector("#phone").value.trim();
+  const address = document.querySelector("#address").value.trim();
+
+  if (!name || !phone || !address) {
+    alert("Please fill all the fields.");
+    return;
+  }
+
+  // ✅ 1) Fetch the product to check stock
+  const { data: product, error: fetchErr } = await supabase
+    .from("products")
+    .select("stock")
+    .eq("id", productId)
+    .single();
+
+  if (fetchErr || !product) {
+    alert("Error fetching product.");
+    return;
+  }
+
+  if (product.stock <= 0) {
+    alert("Sorry, this product is OUT OF STOCK now.");
+    window.location.href = "products.html";
+    return;
+  }
+
+  // ✅ 2) Decrease stock by 1
+  const { error: updateErr } = await supabase
+    .from("products")
+    .update({ stock: product.stock - 1 })
+    .eq("id", productId);
+
+  if (updateErr) {
+    alert("Stock update failed, please try again.");
+    return;
+  }
+
+  // ✅ 3) (Optional) Show success and redirect
+  alert("Order placed successfully! ✅");
+  window.location.href = "products.html";
+});
+</script>
+
+
+</body>
+</html>

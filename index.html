@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>growth — home</title>
+
+  <link rel="preload" href="fonts/ProductSans-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="fonts/ProductSans-Medium.ttf" as="font" type="font/ttf" crossorigin>
+
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="assets/logo.png" type="image/png"/>
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="index.html">growth</a>
+  <nav class="links">
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart</a>
+    <a href="#about">About</a>
+  </nav>
+  <div class="cart">
+    <a href="cart.html">
+      <img src="assets/basket.png" alt="cart">
+      <span id="cartCount" class="badge">0</span>
+    </a>
+  </div>
+</header>
+
+<main class="hero">
+  <div class="hero-blur-card">
+    <img src="assets/logo.png" class="hero-logo" alt="Growth">
+    <p class="hero-tag">find something that feels like home.</p>
+    <a href="products.html" class="cta">Shop now</a>
+  </div>
+</main>
+
+<section id="about" class="about">
+  <h3>about growth</h3>
+  <p>Comfort, warmth, and everyday joy.  
+Soft socks. Cozy gifts. Thoughtful details.  
+Made for all ages, all seasons, and all the small moments that matter.
+</p>
+</section>
+
+<footer class="footer">
+  <small>© <span id="year"></span> growth.lbb · 
+    <a href="https://www.instagram.com/growth.lbb" target="_blank">instagram</a>
+  </small>
+</footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+<script>
+(function(){
+  try{
+    const n = JSON.parse(localStorage.getItem("growth_cart")||"[]").length;
+    const el = document.getElementById("cartCount");
+    if(el) el.textContent = n;
+  } catch(e){}
+})();
+</script>
+
+</body>
+</html>
