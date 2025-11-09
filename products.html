@@ -47,105 +47,70 @@ document.getElementById('year').textContent = new Date().getFullYear();
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
+const SUPABASE_ANON_KEY = "eyJhbGciOi..."; // keep your key
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+let allProducts = [];
+
 async function loadProducts() {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("products")
-    .select("id, name, price, category, image_url, stock")
-    .order("created_at", { ascending: false });
+    .select("id, name, price, category, image_url, stock");
 
+  allProducts = data.map(p => ({ ...p, category: (p.category || "").toLowerCase() }));
+  renderProducts(allProducts);
+}
+
+function renderProducts(list) {
   const grid = document.getElementById("productGrid");
-  document.getElementById("loading").style.display = "none";
-
-  if (error) {
-    console.error(error);
-    grid.innerHTML = "<p>Failed to load products.</p>";
-    return;
-  }
-
-  const items = (data || []).map(p => ({ ...p, stock: Number(p.stock ?? 0) }));
-
-  grid.innerHTML = items.map(p => `
-    <article class="card">
-      <div class="ph" style="background-image:url('${p.image_url}'); background-size:cover; background-position:center;"></div>
-
-      ${p.stock <= 0 ? `<div class="oos-badge">Out of Stock</div>` : ``}
-
+  grid.innerHTML = list.map(p => `
+    <article class="card" data-category="${p.category}">
+      <div class="ph" style="background-image:url('${p.image_url}')"></div>
       <h4>${p.name}</h4>
       <p class="price">$${p.price}</p>
-
       <div class="actions">
-        ${p.stock > 0 
-          ? `
-            <button class="add" data-name="${p.name}" data-price="${p.price}">
-              <img src="assets/add-to-cart.png" alt=""> Add to cart
-            </button>
-            <a class="mini-btn" href="cart.html">Order</a>
-          `
-          : `
-            <button class="mini-btn disabled" disabled>Unavailable</button>
-          `
-        }
+        <button class="add" data-name="${p.name}" data-price="${p.price}">
+          <img src="assets/add-to-cart.png" alt=""> Add to cart
+        </button>
+        <button class="view" data-product='${JSON.stringify(p)}'>View</button>
       </div>
     </article>
   `).join("");
-
-  setupCartButtons();
+  setupAddCart();
+  setupViewProduct();
 }
 
-function setupCartButtons(){
-  function load(){ try{return JSON.parse(localStorage.getItem("growth_cart")||"[]")}catch(e){return []} }
-  function save(arr){ localStorage.setItem("growth_cart",JSON.stringify(arr)); document.getElementById("cartCount").textContent = arr.length; }
+document.querySelectorAll(".cat-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const filter = btn.dataset.filter.toLowerCase();
+    const filtered = filter === "all" ? allProducts : allProducts.filter(p => p.category === filter);
+    renderProducts(filtered);
+  });
+});
 
+function setupAddCart(){
   document.querySelectorAll(".add").forEach(btn=>{
-    btn.addEventListener("click",function(){
-      const cart = load();
-      cart.push({name:this.dataset.name,price:+this.dataset.price,qty:1});
-      save(cart);
-      this.textContent="Added ✓";
-      setTimeout(()=>{this.innerHTML='<img src="assets/add-to-cart.png" alt="">Add to cart'},1200);
+    btn.addEventListener("click", ()=>{
+      let cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
+      cart.push({name:btn.dataset.name,price:+btn.dataset.price,qty:1});
+      localStorage.setItem("growth_cart", JSON.stringify(cart));
     });
   });
+}
 
-  save(load());
+function setupViewProduct(){
+  document.querySelectorAll(".view").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      localStorage.setItem("view_product", btn.dataset.product);
+      window.location.href="product.html";
+    });
+  });
 }
 
 loadProducts();
 </script>
 
-
-<div class="modal" id="imgModal"><img id="modalImg"></div>
-<script>
-const imgs = document.querySelectorAll('.product-img');
-const modal = document.getElementById('imgModal');
-const modalImg = document.getElementById('modalImg');
-imgs.forEach(img => { img.addEventListener('click', () => { modal.classList.add('show'); modalImg.src = img.src; }); });
-modal.addEventListener('click', () => { modal.classList.remove('show'); });
-</script>
-
-<div class="modal" id="imgModal"><img id="modalImg"></div>
-<script>
-const imgs=document.querySelectorAll('.product-img');
-const modal=document.getElementById('imgModal');
-const modalImg=document.getElementById('modalImg');
-imgs.forEach(img=>img.addEventListener('click',()=>{modal.classList.add('show');modalImg.src=img.src;}));
-modal.addEventListener('click',()=>modal.classList.remove('show'));
-
-const filterButtons = document.querySelectorAll('.cat-btn');
-const cards = document.querySelectorAll('.product-card');
-filterButtons.forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const filter = btn.dataset.filter;
-    cards.forEach(card=>{
-      const cat = card.dataset.category?.toLowerCase() || "";
-      card.style.display = (filter==="all" || filter===cat) ? "block" : "none";
-    });
-  });
-});
-</script>
 
 <div id="imgModal" class="modal">
  <span class="close">&times;</span>
