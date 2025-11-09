@@ -24,14 +24,45 @@ async function loadProducts() {
     return;
   }
 
-  container.innerHTML = data.map(p => `
-    <div class="product-card">
-      <img src="${p.image_url}" alt="${p.name}">
-      <h3>${p.name}</h3>
-      <p>${p.category}</p>
-      <strong>${p.price}$</strong>
+  
+container.innerHTML = data.map(p => `
+  <div class="product-card" data-category="${p.category}">
+    <img src="${p.image}" class="product-img" alt="${p.name}">
+    <div class="product-name">${p.name}</div>
+    <div class="product-price">${p.price}$</div>
+    <div class="product-buttons">
+      <button class="btn add">Add to Cart</button>
+      <button class="btn order">Order</button>
     </div>
-  `).join("");
+  </div>
+`).join("");
 }
 
 loadProducts();
+
+
+document.addEventListener("click", (e)=>{
+  if(e.target.classList.contains("product-img")){
+    document.getElementById("modalImg").src = e.target.src;
+    document.getElementById("imgModal").style.display = "flex";
+  }
+});
+document.addEventListener("click", (e)=>{
+  if(e.target.classList.contains("close")){
+    document.getElementById("imgModal").style.display = "none";
+  }
+});
+
+
+document.addEventListener("click", e => {
+  if (e.target.classList.contains("order")) {
+    const card = e.target.closest(".product-card");
+    const product = {
+      name: card.querySelector(".product-name").innerText,
+      price: card.querySelector(".product-price").innerText.replace("$",""),
+      image: card.querySelector(".product-img").src
+    };
+    localStorage.setItem("checkout_product", JSON.stringify(product));
+    window.location.href = "checkout.html";
+  }
+});

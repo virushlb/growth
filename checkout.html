@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Growth</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="checkout-container">
+  <h2>Complete Your Order</h2>
+  <div id="checkout-product"></div>
+  <input type="text" id="customer_name" placeholder="Your Full Name">
+  <input type="text" id="phone" placeholder="Phone Number">
+  <input type="text" id="address" placeholder="Full Address">
+  <textarea id="notes" placeholder="Notes (optional)"></textarea>
+  <button id="place-order" class="btn">Place Order</button>
+</div>
+<script src="js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const product = JSON.parse(localStorage.getItem("checkout_product"));
+document.getElementById("checkout-product").innerHTML = `
+  <img src="${product.image}" class="product-img" style="height:140px;">
+  <div class="product-name">${product.name}</div>
+  <div class="product-price">$${product.price}</div>
+`;
+document.getElementById("place-order").onclick = async () => {
+  const customer_name = customer_name.value.trim();
+  const phone = phone.value.trim();
+  const address = address.value.trim();
+  const notes = notes.value.trim();
+  if (!customer_name || !phone || !address) { alert("Please fill required fields"); return; }
+  const { error } = await supabase.from("growth_orders").insert([{
+    product_name: product.name,
+    product_image: product.image,
+    product_price: product.price,
+    customer_name, phone, address, notes
+  }]);
+  if (!error) { alert("Order placed!"); localStorage.removeItem("checkout_product"); window.location.href="products.html";}
+  else alert("Error placing order");
+};
+</script>
+</body>
+</html>

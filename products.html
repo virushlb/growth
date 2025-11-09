@@ -25,6 +25,12 @@
 
 <main class="container">
   <h1 class="page-title">Products</h1>
+<div class="category-bar">
+  <button class="cat-btn" data-filter="all">All</button>
+  <button class="cat-btn" data-filter="socks">Socks</button>
+  <button class="cat-btn" data-filter="mugs">Mugs</button>
+  <button class="cat-btn" data-filter="gifts">Gifts</button>
+</div>
   <div id="productGrid" class="grid"></div>
   <p id="loading">Loading products...</p>
 </main>
@@ -110,5 +116,41 @@ function setupCartButtons(){
 loadProducts();
 </script>
 
+
+<div class="modal" id="imgModal"><img id="modalImg"></div>
+<script>
+const imgs = document.querySelectorAll('.product-img');
+const modal = document.getElementById('imgModal');
+const modalImg = document.getElementById('modalImg');
+imgs.forEach(img => { img.addEventListener('click', () => { modal.classList.add('show'); modalImg.src = img.src; }); });
+modal.addEventListener('click', () => { modal.classList.remove('show'); });
+</script>
+
+<div class="modal" id="imgModal"><img id="modalImg"></div>
+<script>
+const imgs=document.querySelectorAll('.product-img');
+const modal=document.getElementById('imgModal');
+const modalImg=document.getElementById('modalImg');
+imgs.forEach(img=>img.addEventListener('click',()=>{modal.classList.add('show');modalImg.src=img.src;}));
+modal.addEventListener('click',()=>modal.classList.remove('show'));
+
+const filterButtons = document.querySelectorAll('.cat-btn');
+const cards = document.querySelectorAll('.product-card');
+filterButtons.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const filter = btn.dataset.filter;
+    cards.forEach(card=>{
+      const cat = card.dataset.category?.toLowerCase() || "";
+      card.style.display = (filter==="all" || filter===cat) ? "block" : "none";
+    });
+  });
+});
+</script>
+
+<div id="imgModal" class="modal">
+ <span class="close">&times;</span>
+ <img class="modal-content" id="modalImg">
+</div>
 </body>
+
 </html>
