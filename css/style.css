@@ -262,3 +262,21 @@ a{color:inherit;text-decoration:none}
 .p-desc{ color:#463f3a; line-height:1.5; margin:6px 0 10px; }
 .p-actions{ display:flex; gap:10px; }
 @media(min-width:900px){ #productGrid{ grid-template-columns: repeat(2, 1fr);} }
+#productGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  padding: 10px 0;
+}
+
+.product-card {
+  text-align: center;
+  cursor: pointer;
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
