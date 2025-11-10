@@ -87,19 +87,21 @@ async function loadProduct() {
     </div>
   `;
 
-  document.getElementById("addCart").onclick = () => {
-    const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
-    cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
-    localStorage.setItem("growth_cart", JSON.stringify(cart));
-    document.getElementById("addCart").textContent = "Added ✓";
-  };
+document.getElementById("addCart").onclick = () => {
+  const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
+  cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
+  localStorage.setItem("growth_cart", JSON.stringify(cart));
+  document.getElementById("addCart").textContent = "Added ✓";
+  updateCartCount(); // ← This updates the badge
+};
 
-  document.getElementById("orderBtn").onclick = () => {
-    const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
-    cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
-    localStorage.setItem("growth_cart", JSON.stringify(cart));
-    window.location.href = "cart.html";
-  };
+ document.getElementById("orderBtn").onclick = () => {
+  const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
+  cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
+  localStorage.setItem("growth_cart", JSON.stringify(cart));
+  updateCartCount(); // ← Updates before redirect
+  window.location.href = "cart.html";
+};
 }
 
 loadProduct();
