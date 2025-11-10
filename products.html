@@ -4,6 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>growth — products</title>
+
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="icon" href="assets/logo.png" type="image/png"/>
 </head>
@@ -15,6 +16,7 @@
     <a class="active" href="products.html">Products</a>
     <a href="index.html#about">About</a>
   </nav>
+
   <div class="cart" style="margin-right:12px;">
     <a href="cart.html" title="Cart">
       <img src="assets/basket.png" alt="cart"/>
@@ -40,8 +42,10 @@ document.getElementById('year').textContent = new Date().getFullYear();
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// ✅ Your Supabase Credentials
 const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const productGrid = document.getElementById("productGrid");
@@ -61,14 +65,26 @@ async function loadProducts() {
   }
 
   loading.style.display = "none";
+  productGrid.innerHTML = "";
 
-  productGrid.innerHTML = data.map(p => `
-    <div class="card" onclick="window.location.href='product.html?id=${p.id}'">
-      <img src="${p.image_path}" alt="${p.name}">
-      <h4>${p.name}</h4>
-      <p class="price">$${p.price}</p>
-    </div>
-  `).join("");
+  data.forEach(product => {
+    // ✅ Create Public Storage Image URL
+    const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/product-images/${product.image_path}`;
+
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.onclick = () => {
+      window.location.href = `product.html?id=${product.id}`;
+    };
+
+    card.innerHTML = `
+      <img src="${imageUrl}" alt="${product.name}">
+      <h4>${product.name}</h4>
+      <p class="price">$${product.price}</p>
+    `;
+
+    productGrid.appendChild(card);
+  });
 }
 
 loadProducts();
