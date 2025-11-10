@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>growth — product</title>
   <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="assets/logo.png" type="image/png"/>
 </head>
 
 <body>
@@ -13,17 +14,18 @@
   <a class="brand" href="index.html">growth</a>
   <nav class="links">
     <a href="products.html">Products</a>
+    <a href="cart.html">Cart</a>
     <a href="index.html#about">About</a>
   </nav>
-  <div class="cart" style="margin-right:12px;">
-    <a href="cart.html" title="Cart">
+  <div class="cart">
+    <a href="cart.html">
       <img src="assets/basket.png" alt="cart"/>
       <span id="cartCount" class="badge">0</span>
     </a>
   </div>
 </header>
 
-<main class="product-page">
+<main class="product-page centered">
   <div id="box"></div>
 </main>
 
@@ -40,13 +42,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const BUCKET = "product-images";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const params = new URLSearchParams(window.location.search);
 const productId = params.get("id");
-
-const box = document.getElementById("box");
 
 function imageURL(path){
   return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
@@ -54,59 +54,55 @@ function imageURL(path){
 
 async function loadProduct() {
 
+  const box = document.getElementById("box");
+
+  if(!productId){
+    box.innerHTML = "<p>Product not found.</p>";
+    return;
+  }
+
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("id", productId)
     .single();
 
-  if (error || !data) {
+  if(error || !data){
     box.innerHTML = "<p>Product not found.</p>";
     return;
   }
 
-box.innerHTML = `
-  <div class="p-wrap">
-    <img src="${imageURL(data.image_path)}" class="p-img"/>
-
-    <div class="p-info">
-      <h1>${data.name}</h1>
-      <h2>$${data.price}</h2>
-      <p>${data.description || ""}</p>
-
-      <div class="p-buttons">
-        <button id="addCart" class="btn">Add to cart</button>
-        <button id="orderBtn" class="btn order">Order now</button>
-      </div>
+  box.innerHTML = `
+    <div class="p-hero">
+      <img src="${imageURL(data.image_path)}" alt="${data.name}" class="p-hero-img"/>
     </div>
-  </div>
-`;
 
+    <h2 class="p-title">${data.name}</h2>
+    <div class="p-price">$${data.price}</div>
+    <div class="p-desc">${data.description || ""}</div>
 
-document.getElementById("addCart").onclick = () => {
-  const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
-  cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
-  localStorage.setItem("growth_cart", JSON.stringify(cart));
-  document.getElementById("addCart").textContent = "Added ✓";
-  updateCartCount(); // <--- THIS FIXES THE NUMBER
-};
+    <div class="p-actions">
+      <button id="addCart" class="btn">Add to cart</button>
+      <button id="orderBtn" class="btn order">Order now</button>
+    </div>
+  `;
 
+  document.getElementById("addCart").onclick = () => {
+    const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
+    cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
+    localStorage.setItem("growth_cart", JSON.stringify(cart));
+    document.getElementById("addCart").textContent = "Added ✓";
+  };
 
-document.getElementById("orderBtn").onclick = () => {
-  const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
-  cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
-  localStorage.setItem("growth_cart", JSON.stringify(cart));
-  window.location.href = "cart.html";
-};
+  document.getElementById("orderBtn").onclick = () => {
+    const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
+    cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
+    localStorage.setItem("growth_cart", JSON.stringify(cart));
+    window.location.href = "cart.html";
+  };
+}
 
 loadProduct();
-  
-function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem("growth_cart") || "[]");
-  document.getElementById("cartCount").textContent = cart.length;
-}
-updateCartCount();
-
 </script>
 
 </body>
