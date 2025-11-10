@@ -5,6 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>growth — product</title>
   <link rel="stylesheet" href="css/style.css"/>
+</head>
+
+<body>
+
+<header class="nav">
+  <a class="brand" href="index.html">growth</a>
+  <nav class="links">
+    <a href="products.html">Products</a>
+    <a href="index.html#about">About</a>
+  </nav>
+  <div class="cart" style="margin-right:12px;">
+    <a href="cart.html" title="Cart">
+      <img src="assets/basket.png" alt="cart"/>
+      <span id="cartCount" class="badge">0</span>
+    </a>
+  </div>
+</header>
+
+<main class="product-page">
+  <div id="box"></div>
+</main>
+
+<footer class="footer">
+  <small>© <span id="year"></span> growth.lbb</small>
+</footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -13,8 +43,6 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const BUCKET = "product-images";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Get ?id= from URL
 const params = new URLSearchParams(window.location.search);
 const productId = params.get("id");
 
@@ -26,34 +54,30 @@ function imageURL(path){
 
 async function loadProduct() {
 
-  if(!productId){
-    box.innerHTML = "<p>Product not found.</p>";
-    return;
-  }
-
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("id", productId)
     .single();
 
-  if(error || !data){
+  if (error || !data) {
     box.innerHTML = "<p>Product not found.</p>";
     return;
   }
 
   box.innerHTML = `
-    <div class="p-hero">
-      <img src="${imageURL(data.image_path)}" alt="${data.name}" class="p-hero-img"/>
-    </div>
+    <div class="p-wrap">
+      <img src="${imageURL(data.image_path)}" alt="${data.name}" class="p-img"/>
+      <div class="p-info">
+        <h1>${data.name}</h1>
+        <h2>$${data.price}</h2>
+        <p>${data.description || ""}</p>
 
-    <h2 class="p-title">${data.name}</h2>
-    <div class="p-price">$${data.price}</div>
-    <div class="p-desc">${data.description || ""}</div>
-
-    <div class="p-actions">
-      <button id="addCart" class="btn">Add to cart</button>
-      <button id="orderBtn" class="btn order">Order now</button>
+        <div class="p-buttons">
+          <button id="addCart" class="btn">Add to cart</button>
+          <button id="orderBtn" class="btn order">Order now</button>
+        </div>
+      </div>
     </div>
   `;
 
@@ -75,9 +99,5 @@ async function loadProduct() {
 loadProduct();
 </script>
 
-
-</head>
-<body>
-  <main class="product-page centered"><div id="box"></div></main>
 </body>
 </html>
