@@ -14,36 +14,38 @@
   <a class="brand" href="index.html">growth</a>
   <nav class="links">
     <a href="products.html">Products</a>
-    <a href="cart.html" class="active">Cart</a>
+    <a class="active" href="cart.html">Cart</a>
     <a href="index.html#about">About</a>
   </nav>
   <div class="cart">
     <a href="cart.html">
-      <img src="assets/basket.png" alt="cart">
+      <img src="assets/basket.png" alt="cart"/>
       <span id="cartCount" class="badge">0</span>
     </a>
   </div>
 </header>
 
 <main class="container">
+
   <h1 class="page-title">cart</h1>
 
   <div id="cartList" class="cart-list"></div>
 
-  <div class="cart-total">
-    <span>Products Total:</span> <strong id="cartTotal">$0</strong><br>
-    <span>Delivery Fee:</span> <strong>$4</strong><br><br>
+  <div class="cart-total-box">
+    <p><strong>Products Total:</strong> <span id="cartTotal">$0</span></p>
+    <p><strong>Delivery Fee:</strong> $4</p>
     <h2>Final Total: $<span id="finalTotal">0</span></h2>
   </div>
 
-  <h3>Checkout</h3>
+  <h2 class="checkout-title">Checkout</h2>
 
-  <form id="checkoutForm">
-    <input type="text" id="customerName" placeholder="Your Name" required>
+  <div class="checkout-card">
+    <input type="text" id="customerName" placeholder="Full Name" required>
     <input type="text" id="customerPhone" placeholder="Phone Number" required>
-    <input type="text" id="customerAddress" placeholder="Address" required>
-    <button class="cta" type="submit">Place Order</button>
-  </form>
+    <textarea id="customerAddress" placeholder="Address" required></textarea>
+
+    <button class="btn order" id="placeOrder">Place Order</button>
+  </div>
 
 </main>
 
@@ -61,14 +63,19 @@ const SUPABASE_ANON_KEY =
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function load(){ return JSON.parse(localStorage.getItem("growth_cart")||"[]"); }
-function save(arr){ localStorage.setItem("growth_cart",JSON.stringify(arr)); }
+function save(cart){ localStorage.setItem("growth_cart", JSON.stringify(cart)); }
+
+function updateCartCount(){
+  const c = load();
+  document.getElementById("cartCount").textContent = c.reduce((t,i)=>t+i.qty,0);
+}
 
 function render(){
   const cart = load();
   const list = document.getElementById("cartList");
   let total = 0;
 
-  if(!cart.length){
+  if(cart.length === 0){
     list.innerHTML = "<p>Your cart is empty.</p>";
   } else {
     list.innerHTML = cart.map((item,i)=>`
@@ -81,19 +88,31 @@ function render(){
         </div>
       </div>
     `).join("");
-    total = cart.reduce((sum,item)=>sum+item.price*item.qty,0);
+
+    total = cart.reduce((sum,item)=> sum + item.price*item.qty, 0);
   }
 
-  document.getElementById("cartTotal").textContent="$"+total;
-  document.getElementById("finalTotal").textContent=total+4;
+  document.getElementById("cartTotal").textContent = "$"+total;
+  document.getElementById("finalTotal").textContent = total + 4;
+
+  updateCartCount();
 }
 
-window.changeQty=(i,d)=>{ let c=load(); c[i].qty=Math.max(1,c[i].qty+d); save(c); render(); }
-window.removeItem=(i)=>{ let c=load(); c.splice(i,1); save(c); render(); }
+window.changeQty = (i, d)=>{
+  let cart = load();
+  cart[i].qty = Math.max(1, cart[i].qty + d);
+  save(cart);
+  render();
+};
 
-document.getElementById("checkoutForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
+window.removeItem = (i)=>{
+  let cart = load();
+  cart.splice(i,1);
+  save(cart);
+  render();
+};
 
+document.getElementById("placeOrder").onclick = async ()=>{
   const cart = load();
   if(!cart.length) return;
 
@@ -112,16 +131,18 @@ document.getElementById("checkoutForm").addEventListener("submit", async (e)=>{
   });
 
   for(const item of cart){
-    const { data } = await supabase.from("products").select("stock").eq("name", item.name).single();
+    let { data } = await supabase.from("products").select("stock").eq("name", item.name).single();
     if(data){
-      await supabase.from("products").update({ stock: Math.max(0,data.stock-item.qty) }).eq("name", item.name);
+      await supabase.from("products").update({
+        stock: Math.max(0, data.stock - item.qty)
+      }).eq("name", item.name);
     }
   }
 
   save([]);
   alert("✅ Order placed successfully!");
   window.location.href="products.html";
-});
+};
 
 document.getElementById('year').textContent = new Date().getFullYear();
 render();
