@@ -62,8 +62,9 @@ const SUPABASE_ANON_KEY =
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function load(){ return JSON.parse(localStorage.getItem("growth_cart")||"[]"); }
-function save(cart){ localStorage.setItem("growth_cart", JSON.stringify(cart)); }
+function load(){ return JSON.parse(localStorage.getItem("growth_cart") || "[]"); }
+function save(arr){ localStorage.setItem("growth_cart", JSON.stringify(arr)); }
+
 
 function updateCartCount(){
   const c = load();
