@@ -98,19 +98,21 @@ function render(){
   updateCartCount();
 }
 
-window.changeQty = (i, d)=>{
-  let cart = load();
-  cart[i].qty = Math.max(1, cart[i].qty + d);
-  save(cart);
+window.changeQty = (i,d) => {
+  let c = load();
+  c[i].qty = Math.max(1, c[i].qty + d);
+  save(c);
   render();
-};
+  updateCartCount();
+}
 
-window.removeItem = (i)=>{
-  let cart = load();
-  cart.splice(i,1);
-  save(cart);
+window.removeItem = (i) => {
+  let c = load();
+  c.splice(i,1);
+  save(c);
   render();
-};
+  updateCartCount();
+}
 
 document.getElementById("placeOrder").onclick = async ()=>{
   const cart = load();
