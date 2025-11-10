@@ -378,3 +378,54 @@ nav, header, .nav {
   }
 }
 
+.cart-total-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #fafafa;
+  border: 1px solid #e6e6e6;
+}
+
+.checkout-title {
+  margin-top: 40px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.checkout-card {
+  background: #ffffff;
+  border: 1px solid #dcdcdc;
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 12px;
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkout-card input,
+.checkout-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #bfbfbf;
+  font-size: 15px;
+}
+
+.checkout-card textarea {
+  height: 90px;
+  resize: none;
+}
+
+.checkout-card .btn.order {
+  background: #C48F1B;
+  color: white;
+  font-weight: 600;
+  padding: 13px;
+  border-radius: 10px;
+  width: 100%;
+  text-align: center;
+}
+
