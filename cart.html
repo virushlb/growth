@@ -147,6 +147,13 @@ document.getElementById("placeOrder").onclick = async ()=>{
 document.getElementById('year').textContent = new Date().getFullYear();
 render();
 </script>
+<script>
+function updateCartCount() {
+  const cart = JSON.parse(localStorage.getItem("growth_cart") || "[]");
+  document.getElementById("cartCount").textContent = cart.length;
+}
+updateCartCount();
+</script>
 
 </body>
 </html>
