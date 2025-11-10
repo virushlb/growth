@@ -61,28 +61,18 @@ async function loadProducts() {
   }
 
   loading.style.display = "none";
-  productGrid.innerHTML = "";
 
-  data.forEach(product => {
-    const card = document.createElement("div");
-    card.classList.add("product-card");
-    card.onclick = () => {
-      window.location.href = `product.html?id=${product.id}`;
-    };
-
-    card.innerHTML = `
-      <img src="${product.image_path}" alt="${product.name}">
-      <h3>${product.name}</h3>
-      <p>$${product.price}</p>
-    `;
-
-    productGrid.appendChild(card);
-  });
+  productGrid.innerHTML = data.map(p => `
+    <div class="card" onclick="window.location.href='product.html?id=${p.id}'">
+      <img src="${p.image_path}" alt="${p.name}">
+      <h4>${p.name}</h4>
+      <p class="price">$${p.price}</p>
+    </div>
+  `).join("");
 }
 
 loadProducts();
 </script>
-
 
 </body>
 </html>
