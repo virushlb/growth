@@ -1,61 +1,46 @@
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Product — growth</title>
+  <title>growth — product</title>
   <link rel="stylesheet" href="css/style.css"/>
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./js/config.js";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const local = JSON.parse(localStorage.getItem('view_product')||'null');
-    const box = document.getElementById('productBox');
-    if(local){
+    const BUCKET = "product-images";
+    function imageURL(path){ return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}` }
+    const data = JSON.parse(localStorage.getItem("view_product")||"null");
+    const box = document.getElementById("box");
+    if(!data){ box.innerHTML = "<p>Product not found.</p>"; }
+    else{
       box.innerHTML = `
-        <img src="${local.image_url}" alt="${local.name}"/>
-        <div class="title">${local.name}</div>
-        <div class="price">$${local.price}</div>
-        <div class="desc" id="desc">Loading description…</div>
-        <div class="product-buttons" style="margin-top:12px;">
-          <button class="btn add">Add to Cart</button>
-          <button class="btn order">Order</button>
+        <div class="p-hero"><img src="${imageURL(data.image_path)}" alt="${data.name}" class="p-hero-img"/></div>
+        <h2 class="p-title">${data.name}</h2>
+        <div class="p-price">$${data.price}</div>
+        <div class="p-desc">${data.description||""}</div>
+        <div class="p-actions">
+          <button id="addCart" class="btn">Add to cart</button>
+          <button id="orderBtn" class="btn order">Order now</button>
         </div>
       `;
-      // try to fetch fresh description by name
-      try{
-        const { data } = await supabase.from('products').select('description,stock').eq('name', local.name).limit(1).maybeSingle();
-        if(data){
-          document.getElementById('desc').innerText = data.description || '';
-          if(typeof data.stock === 'number'){
-            const p = document.createElement('div');
-            p.className = 'product-stock';
-            p.innerText = data.stock>0 ? `In stock: ${data.stock}` : 'Out of stock';
-            box.appendChild(p);
-          }
-        }else{
-          document.getElementById('desc').innerText = '';
-        }
-      }catch(_){ document.getElementById('desc').innerText=''; }
     }
-
-    document.addEventListener('click', (e)=>{
-      if(e.target.classList.contains('order')){
-        localStorage.setItem('checkout_product', JSON.stringify({
-          name: document.querySelector('.title').innerText,
-          price: document.querySelector('.price').innerText.replace('$',''),
-          image: document.querySelector('.product-page img').src
-        }));
-        window.location.href='checkout.html';
+    document.addEventListener("click", (e)=>{
+      if(e.target.id==="addCart"){
+        const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
+        cart.push({name:data.name, price:+data.price, qty:1});
+        localStorage.setItem("growth_cart", JSON.stringify(cart));
+        e.target.textContent="Added ✓";
+      }
+      if(e.target.id==="orderBtn"){
+        localStorage.setItem("checkout_product", JSON.stringify({name:data.name, price:data.price, image:imageURL(data.image_path)}));
+        window.location.href="checkout.html";
       }
     });
   </script>
 </head>
 <body>
-  <main class="product-page">
-    <div id="productBox" class="product-page"></div>
-  </main>
+  <main class="product-page centered"><div id="box"></div></main>
 </body>
 </html>

@@ -24,86 +24,14 @@ async function loadProducts() {
     return;
   }
 
-  
-container.innerHTML = data.map(p => `
-  <div class="product-card" data-category="${p.category}">
-    <img src="${p.image}" class="product-img" alt="${p.name}">
-    <div class="product-name">${p.name}</div>
-    <div class="product-price">${p.price}$</div>
-    <div class="product-buttons">
-      <button class="btn add">Add to Cart</button>
-      <button class="btn order">Order</button>
-    </div>
-  </div>
-`).join("");
-}
-
-loadProducts();
-
-
-document.addEventListener("click", (e)=>{
-  if(e.target.classList.contains("product-img")){
-    document.getElementById("modalImg").src = e.target.src;
-    document.getElementById("imgModal").style.display = "flex";
-  }
-});
-document.addEventListener("click", (e)=>{
-  if(e.target.classList.contains("close")){
-    document.getElementById("imgModal").style.display = "none";
-  }
-});
-
-
-function renderProducts(data){
-  const container = document.getElementById("productsContainer");
   container.innerHTML = data.map(p => `
-    <div class="product-card ${p.stock==0?'out':''}" data-category="${p.category||''}">
-      <div class="out-badge">${p.stock==0?'Out of Stock':''}</div>
-      <img src="${p.image_url}" class="product-img" alt="${p.name}">
-      <div class="product-name">${p.name}</div>
-      <div class="product-price">$${p.price}</div>
-      <div class="product-stock">${(p.stock>0)?`In stock: ${p.stock}`:''}</div>
-      <div class="product-buttons">
-        <button class="btn add">Add to Cart</button>
-        <button class="btn order">Order</button>
-      </div>
+    <div class="product-card">
+      <img src="${p.image_url}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <p>${p.category}</p>
+      <strong>${p.price}$</strong>
     </div>
   `).join("");
 }
 
-document.addEventListener("click", (e)=>{
-  if(e.target.classList.contains("product-img")){
-    const card = e.target.closest(".product-card");
-    const product = {
-      name: card.querySelector(".product-name").innerText,
-      price: card.querySelector(".product-price").innerText.replace("$",""),
-      image_url: card.querySelector(".product-img").src,
-      stock: (card.querySelector(".product-stock")?.innerText || '').replace('In stock: ','')
-    };
-    localStorage.setItem("view_product", JSON.stringify(product));
-    window.location.href = "product.html";
-  }
-});
-
-document.addEventListener("click", (e)=>{
-  if(e.target.classList.contains("cat-btn")){
-    const filter = e.target.dataset.filter;
-    document.querySelectorAll(".product-card").forEach(card=>{
-      const cat = (card.dataset.category||'').toLowerCase();
-      card.style.display = (filter==='all' || filter===cat) ? 'block' : 'none';
-    });
-  }
-});
-
-document.addEventListener("click", (e)=>{
-  if(e.target.classList.contains("order")){
-    const card = e.target.closest(".product-card");
-    const product = {
-      name: card.querySelector(".product-name").innerText,
-      price: card.querySelector(".product-price").innerText.replace("$",""),
-      image: card.querySelector(".product-img").src
-    };
-    localStorage.setItem("checkout_product", JSON.stringify(product));
-    window.location.href = "checkout.html";
-  }
-});
+loadProducts();
