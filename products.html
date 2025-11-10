@@ -41,51 +41,48 @@ document.getElementById('year').textContent = new Date().getFullYear();
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg"; // <-- Replace this
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const grid = document.getElementById("productGrid");
-const loadingText = document.getElementById("loading");
+const productGrid = document.getElementById("productGrid");
+const loading = document.getElementById("loading");
 
-// Load products
-async function loadProducts(category = null) {
-  loadingText.style.display = "block";
-  grid.innerHTML = "";
+async function loadProducts() {
+  loading.textContent = "Loading products...";
 
-  let query = supabase
+  const { data, error } = await supabase
     .from("products")
-    .select("id, name, price, category, description, stock, image_path");
-
-  if (category && category !== "all") {
-    query = query.eq("category", category);
-  }
-
-  const { data, error } = await query;
-  loadingText.style.display = "none";
+    .select("id, name, price, image_url");
 
   if (error) {
     console.error(error);
-    grid.innerHTML = "<p>Failed to load products.</p>";
+    loading.textContent = "Failed to load products.";
     return;
   }
 
-  data.forEach(product => {
-    const imageUrl = supabase.storage
-      .from("product-images")
-      .getPublicUrl(product.image_path).data.publicUrl;
+  loading.style.display = "none";
+  productGrid.innerHTML = "";
 
-    grid.innerHTML += `
-      <div class="product-card" onclick="window.location.href='product.html?id=${product.id}'">
-        <img src="${imageUrl}" alt="${product.name}">
-        <h3>${product.name}</h3>
-        <p>${product.price} $</p>
-      </div>
+  data.forEach(product => {
+    const card = document.createElement("div");
+    card.classList.add("product-card");
+    card.onclick = () => {
+      window.location.href = `product.html?id=${product.id}`;
+    };
+
+    card.innerHTML = `
+      <img src="${product.image_url}" alt="${product.name}">
+      <h3>${product.name}</h3>
+      <p>$${product.price}</p>
     `;
+
+    productGrid.appendChild(card);
   });
 }
 
 loadProducts();
 </script>
+
 
 </body>
 </html>
