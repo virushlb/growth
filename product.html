@@ -92,13 +92,12 @@ document.getElementById("addCart").onclick = () => {
 };
 
 
-  document.getElementById("orderBtn").onclick = () => {
-    localStorage.setItem("checkout_product", JSON.stringify({
-      id:data.id, name:data.name, price:data.price, image:imageURL(data.image_path)
-    }));
-    window.location.href="checkout.html";
-  };
-}
+document.getElementById("orderBtn").onclick = () => {
+  const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
+  cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
+  localStorage.setItem("growth_cart", JSON.stringify(cart));
+  window.location.href = "cart.html";
+};
 
 loadProduct();
   
