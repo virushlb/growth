@@ -360,3 +360,21 @@ a{color:inherit;text-decoration:none}
   .p-wrap { flex-direction: column; text-align: left; }
   .p-img { width: 100%; }
 }
+.product-page.centered {
+  padding-top: 20px;
+}
+
+nav, header, .nav {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+}
+
+/* Make image not too tall on phones */
+@media(max-width: 750px){
+  .p-img {
+    max-height: 360px;
+  }
+}
+
