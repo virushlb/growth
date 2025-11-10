@@ -88,12 +88,19 @@ async function loadProduct() {
   `;
 
 document.getElementById("addCart").onclick = () => {
-  const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
-  cart.push({ id:data.id, name:data.name, price:+data.price, qty:1, image:imageURL(data.image_path) });
+  const cart = JSON.parse(localStorage.getItem("growth_cart") || "[]");
+  cart.push({
+    id: data.id,
+    name: data.name,
+    price: Number(data.price),
+    qty: 1,
+    image: imageURL(data.image_path)
+  });
   localStorage.setItem("growth_cart", JSON.stringify(cart));
   document.getElementById("addCart").textContent = "Added ✓";
-  updateCartCount(); // ← This updates the badge
+  updateCartCount();
 };
+
 
  document.getElementById("orderBtn").onclick = () => {
   const cart = JSON.parse(localStorage.getItem("growth_cart")||"[]");
