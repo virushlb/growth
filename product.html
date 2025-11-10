@@ -104,6 +104,13 @@ async function loadProduct() {
 
 loadProduct();
 </script>
+<script>
+function updateCartCount() {
+  const cart = JSON.parse(localStorage.getItem("growth_cart") || "[]");
+  document.getElementById("cartCount").textContent = cart.length;
+}
+updateCartCount();
+</script>
 
 </body>
 </html>
