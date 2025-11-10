@@ -52,7 +52,7 @@ async function loadProducts() {
 
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, price, image_url");
+    .select("id, name, price, image_path");
 
   if (error) {
     console.error(error);
@@ -71,7 +71,7 @@ async function loadProducts() {
     };
 
     card.innerHTML = `
-      <img src="${product.image_url}" alt="${product.name}">
+      <img src="${product.image_path}" alt="${product.name}">
       <h3>${product.name}</h3>
       <p>$${product.price}</p>
     `;
