@@ -40,18 +40,28 @@ document.getElementById('year').textContent = new Date().getFullYear();
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
+const SUPABASE_URL = "https://ngtzknecstzlxcppeelth.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg"; // <-- Replace this
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-async function loadProducts() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("id, name, price, category, image_path, stock")
-    .order("created_at", { ascending: false });
+const grid = document.getElementById("productGrid");
+const loadingText = document.getElementById("loading");
 
-  const grid = document.getElementById("productGrid");
-  document.getElementById("loading").style.display = "none";
+// Load products
+async function loadProducts(category = null) {
+  loadingText.style.display = "block";
+  grid.innerHTML = "";
+
+  let query = supabase
+    .from("products")
+    .select("id, name, price, category, description, stock, image_path");
+
+  if (category && category !== "all") {
+    query = query.eq("category", category);
+  }
+
+  const { data, error } = await query;
+  loadingText.style.display = "none";
 
   if (error) {
     console.error(error);
@@ -59,65 +69,23 @@ async function loadProducts() {
     return;
   }
 
-  const items = (data || []).map(p => ({ ...p, stock: Number(p.stock ?? 0) }));
-
-  grid.innerHTML = items.map(p => {
-    // ✅ Convert storage path to public URL
-    const { data: urlData } = supabase.storage
+  data.forEach(product => {
+    const imageUrl = supabase.storage
       .from("product-images")
-      .getPublicUrl(p.image_path);
+      .getPublicUrl(product.image_path).data.publicUrl;
 
-    const img = urlData.publicUrl;
-
-    return `
-    <article class="card" onclick="viewProduct('${p.id}')">
-      <div class="ph" style="background-image:url('${img}'); background-size:cover; background-position:center;"></div>
-
-      ${p.stock <= 0 ? `<div class="oos-badge">Out of Stock</div>` : ``}
-
-      <h4>${p.name}</h4>
-      <p class="price">$${p.price}</p>
-
-      <div class="actions">
-        ${p.stock > 0 
-          ? `<button class="add" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">
-              <img src="assets/add-to-cart.png" alt=""> Add to cart
-            </button>`
-          : `<button class="mini-btn disabled" disabled>Unavailable</button>`
-        }
+    grid.innerHTML += `
+      <div class="product-card" onclick="window.location.href='product.html?id=${product.id}'">
+        <img src="${imageUrl}" alt="${product.name}">
+        <h3>${product.name}</h3>
+        <p>${product.price} $</p>
       </div>
-    </article>`;
-  }).join("");
-
-  setupCartButtons();
-}
-
-function setupCartButtons(){
-  function load(){ try{return JSON.parse(localStorage.getItem("growth_cart")||"[]")}catch(e){return []} }
-  function save(arr){ localStorage.setItem("growth_cart",JSON.stringify(arr)); document.getElementById("cartCount").textContent = arr.length; }
-
-  document.querySelectorAll(".add").forEach(btn=>{
-    btn.addEventListener("click",function(){
-      const cart = load();
-      cart.push({name:this.dataset.name,price:+this.dataset.price,qty:1});
-      save(cart);
-      this.textContent="Added ✓";
-      setTimeout(()=>{this.innerHTML='<img src="assets/add-to-cart.png" alt=""> Add to cart'},1200);
-    });
+    `;
   });
-
-  save(load());
 }
-
-// ✅ Clicking a product now opens the details page
-window.viewProduct = (id) => {
-  localStorage.setItem("selected_product", id);
-  window.location.href = "product.html";
-};
 
 loadProducts();
 </script>
-
 
 </body>
 </html>
