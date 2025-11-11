@@ -79,16 +79,24 @@ function render(){
   if(cart.length === 0){
     list.innerHTML = "<p>Your cart is empty.</p>";
   } else {
-    list.innerHTML = cart.map((item,i)=>`
-      <div class="cart-item">
-        <span>${item.name} (x${item.qty})</span>
-        <div class="cart-controls">
-          <button onclick="changeQty(${i},-1)">-</button>
-          <button onclick="changeQty(${i},1)">+</button>
-          <button onclick="removeItem(${i})">remove</button>
-        </div>
-      </div>
-    `).join("");
+   list.innerHTML = cart.map((item,i)=>`
+  <div class="cart-item">
+    <img src="${item.image}" class="cart-img">
+    <div class="cart-info">
+      <h4>${item.name}</h4>
+      <p>$${item.price}</p>
+    </div>
+
+    <div class="cart-controls">
+      <button onclick="changeQty(${i},-1)">-</button>
+      <span>${item.qty}</span>
+      <button onclick="changeQty(${i},1)">+</button>
+    </div>
+
+    <button class="remove" onclick="removeItem(${i})">×</button>
+  </div>
+`).join("");
+
 
     total = cart.reduce((sum,item)=> sum + item.price*item.qty, 0);
   }
