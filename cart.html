@@ -115,7 +115,9 @@ window.removeItem = (i) => {
   updateCartCount();
 }
 
-document.getElementById("placeOrder").onclick = async ()=>{
+document.getElementById("checkoutForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+
   const cart = load();
   if(!cart.length) return;
 
@@ -133,6 +135,7 @@ document.getElementById("placeOrder").onclick = async ()=>{
     total: finalTotal
   });
 
+  // Update stock
   for(const item of cart){
     let { data } = await supabase.from("products").select("stock").eq("name", item.name).single();
     if(data){
@@ -142,20 +145,11 @@ document.getElementById("placeOrder").onclick = async ()=>{
     }
   }
 
-  save([]);
+  save([]); // clear cart
   alert("✅ Order placed successfully!");
-  window.location.href="products.html";
-};
+  window.location.href = "products.html";
+});
 
-document.getElementById('year').textContent = new Date().getFullYear();
-render();
-</script>
-<script>
-function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem("growth_cart") || "[]");
-  document.getElementById("cartCount").textContent = cart.length;
-}
-updateCartCount();
 </script>
 
 </body>
