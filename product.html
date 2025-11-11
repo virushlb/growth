@@ -88,18 +88,33 @@ async function loadProduct() {
   `;
 
 document.getElementById("addCart").onclick = () => {
-  const cart = JSON.parse(localStorage.getItem("growth_cart") || "[]");
-  cart.push({
-    id: data.id,
-    name: data.name,
-    price: Number(data.price),
-    qty: 1,
-    image: imageURL(data.image_path)
-  });
+  let cart = JSON.parse(localStorage.getItem("growth_cart") || "[]");
+
+  let existing = cart.find(item => item.id === data.id);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({
+      id: data.id,
+      name: data.name,
+      price: Number(data.price),
+      qty: 1,
+      image: imageURL(data.image_path)
+    });
+  }
+
   localStorage.setItem("growth_cart", JSON.stringify(cart));
-  document.getElementById("addCart").textContent = "Added ✓";
   updateCartCount();
+  document.getElementById("addCart").textContent = "Added ✓";
+  window.location.href = "cart.html"; // ✅ Goes to cart after adding
 };
+
+function updateCartCount(){
+  const cart = JSON.parse(localStorage.getItem("growth_cart") || "[]");
+  document.getElementById("cartCount").textContent = cart.reduce((t,i)=>t+i.qty,0);
+}
+updateCartCount();
+
 
 
  document.getElementById("orderBtn").onclick = () => {
