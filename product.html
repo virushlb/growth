@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>growth — product</title>
+  <link rel="icon" href="assets/logo.png" type="image/png"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div class="bf-banner" id="bfBanner">
+    Use <strong>growth35</strong> code for <strong>35% discount</strong>
+    <span class="bf-close" onclick="document.getElementById('bfBanner').style.display='none'">✕</span>
+</div>
+
+  <header class="nav">
+    <a class="brand" href="index.html">growth</a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="index.html#about">About</a>
+    </nav>
+    
+    <div class="cart">
+      <a href="cart.html">
+        <span class="cart-icon">🧺</span>
+        <span id="cartCount" class="badge">0</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="page">
+    <section id="productDetail" class="product-detail" data-reveal>
+      <!-- JS renders product here -->
+    </section>
+  </main>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <footer class="footer">
+    <p>growth — socks & gifts</p>
+  </footer>
+
+  <script src="js/shared.js"></script>
+  <script src="js/product-detail.js"></script>
+
+<footer class="growth-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h2 class="footer-logo-text">GROWTH</h2>
+            <p class="footer-slogan">Gifts that feel good.</p>
+        </div>
+        <div class="footer-section">
+            <h3>Quick Links</h3>
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="categories.html">Categories</a>
+            <a href="checkout.html">Checkout</a>
+            <a href="cart.html">Cart</a>
+        </div>
+        <div class="footer-section">
+            <h3>Contact</h3>
+            <p>📞 +961 71 209 028</p>
+            <p>📸 <a href="https://www.instagram.com/growth.lbb" target="_blank">@growth.lbb</a></p>
+            <p>💬 WhatsApp: <a href="https://wa.me/96171209028" target="_blank">Order Now</a></p>
+        </div>
+    </div>
+    <div class="footer-credit">
+        © 2025 Growth. All rights reserved. • Developed by
+        <a href="https://virushlb.github.io/virush/" target="_blank">Virush</a>
+    </div>
+</footer>
+
+
+  <a href="cart.html" class="floating-cart" aria-label="View cart">
+    🧺
+    <span id="cartCountFloating" class="
