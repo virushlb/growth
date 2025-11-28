@@ -1331,3 +1331,7 @@ body
     gap:14px !important;
   }
 }
+/* Promo banner styling */
+.promo-banner {
+  text-transform: uppercase;
+}
