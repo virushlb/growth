@@ -20,41 +20,51 @@ function pickRandomRelated(products, currentId, count = 3) {
 
 async function renderProductDetail() {
   if (!detailRoot) return;
-const id = getQueryId();
-let products = [];
-let product = null;
-try {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}?select=*`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
+  const id = getQueryId();
+  let products = [];
+  let product = null;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}?select=*`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    });
+
+    if (!res.ok) {
+      console.error("Failed to load product detail", await res.text());
+    } else {
+      const data = await res.json();
+
+      // FIXED VERSION — MULTI-IMAGES LOADED CORRECTLY
+      products = (data || []).map(row => ({
+        id: row.id,
+        name: row.name || "",
+        price: typeof row.price === "number" ? row.price : parseFloat(row.price || "0") || 0,
+        discountPrice: row.discount_price != null
+          ? (typeof row.discount_price === "number"
+              ? row.discount_price
+              : parseFloat(row.discount_price))
+          : null,
+        category: row.category || "other",
+        description: row.description || "",
+        stock: typeof row.stock === "number"
+          ? row.stock
+          : parseInt(row.stock || "0", 10) || 0,
+        image: row.image_path || null,
+        images:
+          Array.isArray(row.images) && row.images.length
+            ? row.images
+            : (row.image_path ? [row.image_path] : []),
+        active: true
+      }));
+
+      product = products.find(p => p.id === id) || products[0];
     }
-  });
-  if (!res.ok) {
-    console.error("Failed to load product detail", await res.text());
-  } else {
-    const data = await res.json();
-    products = (data || []).map(row => ({
-      id: row.id,
-      name: row.name || "",
-      price: typeof row.price === "number" ? row.price : parseFloat(row.price || "0") || 0,
-      discountPrice: row.discount_price != null ? (typeof row.discount_price === "number" ? row.discount_price : parseFloat(row.discount_price)) : null,
-      category: row.category || "other",
-      description: row.description || "",
-      stock: typeof row.stock === "number" ? row.stock : parseInt(row.stock || "0", 10) || 0,
-      image: row.image_path || null,
-      images: row.image_path ? [row.image_path] : [],
-      active: true
-    }));
-    product = products.find(p => p.id === id) || products[0];
+  } catch (err) {
+    console.error("Error loading product detail from Supabase", err);
   }
-} catch (err) {
-  console.error("Error loading product detail from Supabase", err);
-}
-if (!product) {
-  detailRoot.innerHTML = '<div class="empty-state">Product not found.</div>';
-  return;
-}
 
   if (!product) {
     detailRoot.innerHTML = '<div class="empty-state">Product not found.</div>';
@@ -101,6 +111,7 @@ if (!product) {
         <div class="gallery-main">
           <img src="${mainImage}" alt="${product.name}" id="galleryMain">
         </div>
+
         ${images.length > 1 ? `
         <div class="gallery-thumbs">
           ${images
@@ -126,6 +137,7 @@ if (!product) {
         </div>
         <button class="btn primary" id="detailAdd" ${out ? "disabled" : ""}>Add to cart</button>
       </div>
+
       <p class="checkout-helper" style="margin-top:10px;">
         You can always adjust quantities later in your cart.
       </p>
@@ -215,6 +227,7 @@ if (!product) {
       }
 
       writeCart(cart);
+
       const toast = document.getElementById("toast");
       if (toast) {
         toast.textContent = "Added to cart ✔";
