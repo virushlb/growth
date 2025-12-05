@@ -128,3 +128,88 @@ input[type="file"] {
   border-radius: 8px;
   margin-right: 5px;
 }
+/* Search container MUST be above products */
+.search-container {
+  position: relative;
+  z-index: 20;
+}
+
+/* The dropdown list */
+.search-suggestions {
+  position: absolute;
+  top: 50px;   /* adjust depending on your search bar height */
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 30; /* Higher than everything */
+}
+
+/* Each suggestion */
+.search-suggestion {
+  padding: 12px;
+  cursor: pointer;
+}
+
+.search-suggestion:hover {
+  background: #f2f2f2;
+}
+/* FINAL CLEAN BLACK BANNER */
+#promoBanner,
+.top-banner {
+  background: #000 !important;
+  color: #fff !important;
+  padding: 14px 20px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+/* Bold promo code + percentage */
+#promoBanner strong {
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+/* Close button */
+#promoBanner #closeBanner {
+  margin-left: 10px !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+  color: #fff !important;
+}
+/* GROWTH WEBSITE – FINAL BLACK PROMO BANNER */
+#promoBanner,
+.top-banner {
+  background: #000;          /* black banner */
+  color: #fff;               /* white text */
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* bold promo code + percent */
+#promoBanner strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* close button */
+#promoBanner #closeBanner {
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #fff;
+}

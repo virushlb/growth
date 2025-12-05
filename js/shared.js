@@ -82,6 +82,23 @@ function readCart() {
 function writeCart(cart) {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
   updateCartCount();
+
+
+  // Promo banner from admin (promo_settings via localStorage)
+  const banner = document.getElementById("bfBanner");
+  const bannerText = document.getElementById("bfText");
+  if (banner && bannerText) {
+    const code = (localStorage.getItem("growth_promo_code") || "").trim();
+    const discount = parseFloat(localStorage.getItem("growth_promo_discount") || "0");
+
+    if (code && !Number.isNaN(discount) && discount > 0) {
+      bannerText.innerHTML = `Use <strong>${code}</strong> code for <strong>${discount}% discount</strong>`;
+      banner.style.display = "block";
+    } else {
+      banner.style.display = "none";
+    }
+  }
+
 }
 
 
@@ -140,4 +157,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-

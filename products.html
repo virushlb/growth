@@ -8,11 +8,11 @@
   <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-<div class="bf-banner" id="bfBanner">
-    Use <strong>growth35</strong> code for <strong>35% discount</strong>
+<div class="bf-banner" id="bfBanner" style="display:none">
+    <span id="bfText"></span>
     <span class="bf-close" onclick="document.getElementById('bfBanner').style.display='none'">✕</span>
 </div>
-
+<div id="promoBanner" class="top-banner"></div>
   <header class="nav">
     <a class="brand" href="index.html">growth</a>
     <nav class="links">
@@ -20,7 +20,7 @@
       <a class="active" href="products.html">Products</a>
       <a href="index.html#about">About</a>
     </nav>
-    
+
     <div class="cart">
       <a href="cart.html">
         <span class="cart-icon">🧺</span>
@@ -35,18 +35,42 @@
         <p class="eyebrow">All products</p>
         <h1 class="page-title">Products</h1>
       </div>
-      <div class="filters">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="socks" id="socks">Socks</button>
-        <button class="filter-btn" data-filter="gifts" id="gifts">Gifts</button>
-        <button class="filter-btn" data-filter="mugs" id="mugs">Mugs</button>
-        <button class="filter-btn" data-filter="accessories" id="accessories">Accessories</button>
-      </div>
+
+ <div class="filters-row">
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="socks" id="socks">Socks</button>
+    <button class="filter-btn" data-filter="gifts" id="gifts">Gifts</button>
+    <button class="filter-btn" data-filter="mugs" id="mugs">Mugs</button>
+    <button class="filter-btn" data-filter="accessories" id="accessories">Accessories</button>
+  </div>
+
+  <div class="search-wrap">
+    <input
+      type="text"
+      id="productSearch"
+      class="product-search-input"
+      placeholder="Search for a product..."
+      autocomplete="off"
+    />
+  <div id="searchSuggestions" class="search-suggestions"></div><!--NO SPACE-->
+
+  </div>
+</div>
+
+
+
+
+  </div>
+</div>
+
     </header>
 
     <section class="products-grid" id="productsGrid" data-reveal>
       <!-- JS will render products here -->
     </section>
+
+    <div id="pagination" class="pagination"></div>
   </main>
 
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -89,4 +113,8 @@
 
   <a href="cart.html" class="floating-cart" aria-label="View cart">
     🧺
-    <span id="cartCountFloating" class="
+    <span id="cartCountFloating" class="badge">0</span>
+  </a>
+ <script type="module" src="js/banner.js"></script>
+
+</html>
