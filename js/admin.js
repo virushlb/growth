@@ -1,5 +1,3 @@
-const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
 const PRODUCTS_TABLE = "products";
 
 const adminBody = document.getElementById("adminBody");
@@ -12,10 +10,7 @@ let products = [];
 
 async function loadAdminProducts() {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}?select=*`, {
       headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
       }
     });
     if (!res.ok) {
@@ -301,21 +296,15 @@ if (adminBody) {
       }));
 
       // delete all existing products
-      await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}?id=not.is.null`, {
         method: "DELETE",
         headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`
         }
       });
 
       // insert new set
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
           Prefer: "return=representation"
         },
         body: JSON.stringify(rows)
@@ -364,19 +353,13 @@ if (adminBody) {
         image_path: (p.images && p.images[0]) || p.image || null,
         stock: p.stock ?? 0
       }));
-      await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}?id=not.is.null`, {
         method: "DELETE",
         headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`
         }
       });
-      await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
           Prefer: "return=minimal"
         },
         body: JSON.stringify(rows)

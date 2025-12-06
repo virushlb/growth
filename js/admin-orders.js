@@ -2,8 +2,6 @@
 let lastOrderCount = null;
 
 const ORDERS_TABLE = "orders";
-const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
 const SHOP_WHATSAPP = "96171209028";
 
 const ordersBody = document.getElementById("ordersBody");
@@ -88,10 +86,7 @@ async function fetchOrders() {
   if (ordersStatus) ordersStatus.textContent = "";
 
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${ORDERS_TABLE}?select=*&order=created_at.desc`, {
       headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
       },
     });
 
@@ -170,12 +165,9 @@ async function fetchOrders() {
       confirmBtn.textContent = "Mark confirmed";
       confirmBtn.addEventListener("click", async () => {
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/${ORDERS_TABLE}?id=eq.${order.id}`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
-              apikey: SUPABASE_KEY,
-              Authorization: `Bearer ${SUPABASE_KEY}`,
               Prefer: "return=minimal",
             },
             body: JSON.stringify({ status: "confirmed" }),
@@ -202,11 +194,8 @@ async function fetchOrders() {
       deleteBtn.addEventListener("click", async () => {
         if (!confirm("Delete this order?")) return;
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/${ORDERS_TABLE}?id=eq.${order.id}`, {
             method: "DELETE",
             headers: {
-              apikey: SUPABASE_KEY,
-              Authorization: `Bearer ${SUPABASE_KEY}`,
               Prefer: "return-minimal",
             },
           });

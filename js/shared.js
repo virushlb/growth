@@ -1,58 +1,80 @@
+// Shared utilities and Supabase client for Growth
+
+// =============================
+// SUPABASE GLOBAL CLIENT
+// =============================
+
+// Your Supabase project URL + anon key
+const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
+
+// Expose for other scripts that still use fetch(...)
+window.SUPABASE_URL = SUPABASE_URL;
+window.SUPABASE_KEY = SUPABASE_KEY;
+
+// Create a single shared Supabase client if the library is present
+if (typeof supabase !== "undefined" && !window.supabaseClient) {
+  window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // Backwards‑compat alias used in banner.js & products.js
+  window.supabase = window.supabaseClient;
+}
+
+// =============================
+// CART + PRODUCTS CONSTANTS
+// =============================
 const CART_KEY = "growth_cart";
 const PRODUCTS_KEY = "growth_products";
 const DELIVERY_FEE = 4;
 
+// =============================
+// CART HELPERS
+// =============================
+function readCart() {
+  try {
+    const raw =
+      localStorage.getItem(CART_KEY) ??
+      localStorage.getItem("cart");
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error("cart parse error", e);
+    return [];
+  }
+}
+
+function writeCart(cart) {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart || []));
+  } catch (e) {
+    console.warn("Failed to write cart to localStorage", e);
+  }
+}
+
+function updateCartCount() {
+  const cart = readCart();
+  const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+
+  const badge = document.getElementById("cartCount");
+  const floating = document.getElementById("cartCountFloating");
+
+  if (badge) {
+    badge.textContent = count;
+    badge.classList.add("bump");
+    setTimeout(() => badge.classList.remove("bump"), 300);
+  }
+  if (floating) {
+    floating.textContent = count;
+    floating.classList.add("bump");
+    setTimeout(() => floating.classList.remove("bump"), 300);
+  }
+}
+
+// =============================
+// PRODUCTS CACHE (optional)
+// =============================
 function defaultProducts() {
-  return [
-    {
-      id: "sock-cozy-1",
-      name: "Cozy striped socks",
-      price: 12,
-      discountPrice: 9,
-      category: "socks",
-      image: "assets/img/sock1.jpg",
-      images: ["assets/img/sock1.jpg", "assets/img/sock2.jpg"],
-      stock: 8,
-      description: "Soft cotton striped socks that keep your feet warm and cozy.",
-      active: true
-    },
-    {
-      id: "sock-plain-1",
-      name: "Plain beige socks",
-      price: 8,
-      discountPrice: null,
-      category: "socks",
-      image: "assets/img/sock2.jpg",
-      images: ["assets/img/sock2.jpg"],
-      stock: 5,
-      description: "Minimal beige socks that go with everything. Everyday comfort.",
-      active: true
-    },
-    {
-      id: "gift-mug-1",
-      name: "Warm mug",
-      price: 10,
-      discountPrice: 8,
-      category: "mugs",
-      image: "assets/img/mug1.jpg",
-      images: ["assets/img/mug1.jpg"],
-      stock: 3,
-      description: "Ceramic mug for coffee or tea with a soft cozy vibe.",
-      active: true
-    },
-    {
-      id: "gift-mini-1",
-      name: "Mini gift box",
-      price: 15,
-      discountPrice: null,
-      category: "gifts",
-      image: "assets/img/gift1.jpg",
-      images: ["assets/img/gift1.jpg"],
-      stock: 4,
-      description: "Small gift box with mixed little items, ready to offer.",
-      active: true
-    }
-  ];
+  return [];
 }
 
 function readProducts() {
@@ -66,84 +88,37 @@ function readProducts() {
 }
 
 function writeProducts(products) {
-  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
-}
-
-function readCart() {
   try {
-    const raw = localStorage.getItem(CART_KEY);
-    return raw ? JSON.parse(raw) : [];
+    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products || []));
   } catch (e) {
-    console.error("cart parse error", e);
-    return [];
+    console.error("writeProducts error", e);
   }
 }
 
-function writeCart(cart) {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  updateCartCount();
+// =============================
+// TOAST
+// =============================
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
 
+  toast.textContent = message;
+  toast.classList.add("show");
 
-  // Promo banner from admin (promo_settings via localStorage)
-  const banner = document.getElementById("bfBanner");
-  const bannerText = document.getElementById("bfText");
-  if (banner && bannerText) {
-    const code = (localStorage.getItem("growth_promo_code") || "").trim();
-    const discount = parseFloat(localStorage.getItem("growth_promo_discount") || "0");
-
-    if (code && !Number.isNaN(discount) && discount > 0) {
-      bannerText.innerHTML = `Use <strong>${code}</strong> code for <strong>${discount}% discount</strong>`;
-      banner.style.display = "block";
-    } else {
-      banner.style.display = "none";
-    }
-  }
-
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2000);
 }
 
-
-function updateCartCount() {
-  const cart = readCart();
-  const count = cart.reduce((sum, item) => sum + item.qty, 0);
-  const badge = document.getElementById("cartCount");
-  const floating = document.getElementById("cartCountFloating");
-  if (badge) {
-    badge.textContent = count;
-    badge.classList.add("bump");
-    setTimeout(() => badge.classList.remove("bump"), 300);
-  }
-  if (floating) {
-    floating.textContent = count;
-    floating.classList.add("bump");
-    setTimeout(() => floating.classList.remove("bump"), 300);
-  }
-}
-
-
-
+// =============================
+// SHARED INIT
+// =============================
 document.addEventListener("DOMContentLoaded", () => {
+  // Always sync cart count on page load
   updateCartCount();
 
-  // Mark body as ready for fade-in
-  document.body.classList.add("page-ready");
-
-  // Scroll reveal
-  const revealEls = document.querySelectorAll("[data-reveal]");
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.15 });
-    revealEls.forEach(el => io.observe(el));
-  } else {
-    revealEls.forEach(el => el.classList.add("is-visible"));
-  }
-
-  // Theme toggle
+  // Theme toggle (optional)
   const root = document.body;
   const toggle = document.getElementById("themeToggle");
   const storedTheme = localStorage.getItem("growth_theme");

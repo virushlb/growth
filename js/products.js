@@ -3,10 +3,6 @@
 // =========================================================
 
 // -------------------- CONFIG --------------------
-const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
-
 const PRODUCTS_TABLE = "products";
 
 const grid = document.getElementById("productsGrid");
@@ -38,23 +34,17 @@ function shuffleInPlace(arr) {
 }
 
 // -------------------- LOAD PRODUCTS --------------------
+// -------------------- LOAD PRODUCTS --------------------
 async function loadProductsFromSupabase() {
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}?select=*`,
-      {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-      }
-    );
+    const { data, error } = await window.supabase
+      .from(PRODUCTS_TABLE)
+      .select("*");
 
-    if (!res.ok) {
-      console.error("Failed to load products:", await res.text());
+    if (error) {
+      console.error("Failed to load products:", error);
       allProducts = [];
     } else {
-      const data = await res.json();
       allProducts = (data || []).map((row) => ({
         id: row.id,
         name: row.name || row.title || "",
@@ -91,6 +81,7 @@ async function loadProductsFromSupabase() {
 
   renderProducts();
 }
+
 
 // -------------------- FILTER + SEARCH + PAGINATION --------------------
 function getFilteredProducts() {
@@ -203,24 +194,6 @@ function renderProducts() {
   renderPagination(totalPages);
 }
 // -------------------- CART STORAGE --------------------
-function readCart() {
-  return JSON.parse(localStorage.getItem("cart") || "[]");
-}
-
-function writeCart(cart) {
-  localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-function updateCartCount() {
-  const cart = readCart();
-  const total = cart.reduce((sum, item) => sum + item.qty, 0);
-
-  const badge1 = document.getElementById("cartCount");
-  const badge2 = document.getElementById("cartCountFloating");
-
-  if (badge1) badge1.textContent = total;
-  if (badge2) badge2.textContent = total;
-}
 
 // -------------------- CART ADD LOGIC --------------------
 function handleAddToCart(id) {

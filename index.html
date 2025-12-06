@@ -6,12 +6,17 @@
   <title>growth — home</title>
   <link rel="icon" href="assets/logo.png" type="image/png"/>
   <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="js/shared.js"></script>
 </head>
 <body>
 <div class="bf-banner" id="bfBanner" style="display:none">
     <span id="bfText"></span>
     <span class="bf-close" onclick="document.getElementById('bfBanner').style.display='none'">✕</span>
 </div>
+<div id="promoBanner" class="top-banner"></div>
+
 
   <header class="nav">
     <a class="brand" href="index.html">growth</a>
@@ -90,9 +95,6 @@
     <p>WhatsApp: <a href="https://wa.me/96171209028" target="_blank" rel="noopener">+961 71 209 028</a></p>
     <p><a href="https://www.instagram.com/growth.lbb" target="_blank" rel="noopener">@growth.lbb</a></p>
   </footer>
-
-  <script src="js/shared.js"></script>
-
 <footer class="growth-footer">
     <div class="footer-content">
         <div class="footer-section">
@@ -121,6 +123,11 @@
 </footer>
 
 
-  <a href="cart.html" class="floating-cart" aria-label="View cart">
-    🧺
-    <span id="cartCountFloating" class="
+ <a href="cart.html" class="floating-cart" aria-label="View cart">
+  🧺
+  <span id="cartCountFloating" class="badge">0</span>
+</a>
+
+<script src="js/banner.js" type="module"></script>
+</body>
+</html>

@@ -23,8 +23,6 @@ function decreaseLocalStock(cart) {
 // =============================
 // SUPABASE CONFIG
 // =============================
-const SUPABASE_URL = "https://ngtzknecstzlxcpeelth.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ndHprbmVjc3R6bHhjcGVlbHRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTQ5NjksImV4cCI6MjA3ODE5MDk2OX0.IXvn2GvftKM96DObzCzA1Nvaye9dHri7t5SZfER0eDg";
 const SUPABASE_ORDERS_TABLE = "orders";
 
 // =============================
@@ -33,15 +31,19 @@ const SUPABASE_ORDERS_TABLE = "orders";
 async function decreaseStock(cart) {
   for (const item of cart) {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${item.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({ stock: item.stock - item.qty })
-      });
+      if (!window.SUPABASE_URL || !window.SUPABASE_KEY) continue;
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/products?id=eq.${item.id}` ,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({ stock: item.stock - item.qty })
+        }
+      );
 
       if (!res.ok) {
         console.error("Failed to update stock:", await res.text());
@@ -72,7 +74,9 @@ const SHOP_WHATSAPP = "96171209028";
 // =============================
 async function saveOrderToSupabase(order) {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_ORDERS_TABLE}`, {
+    if (!window.SUPABASE_URL || !window.SUPABASE_KEY) return;
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -183,6 +187,8 @@ if (checkoutForm) {
 
     // CLEAR CART LOCALLY
     localStorage.removeItem(CART_KEY);
+    localStorage.removeItem("cart");
+    writeCart([]);
     updateCartCount();
 
 // BUILD CLEAN WHATSAPP MESSAGE (NO ITEMS FOR CUSTOMER)

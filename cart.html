@@ -6,12 +6,17 @@
   <title>growth — cart</title>
   <link rel="icon" href="assets/logo.png" type="image/png"/>
   <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="js/shared.js"></script>
 </head>
 <body>
 <div class="bf-banner" id="bfBanner" style="display:none">
     <span id="bfText"></span>
     <span class="bf-close" onclick="document.getElementById('bfBanner').style.display='none'">✕</span>
 </div>
+<div id="promoBanner" class="top-banner"></div>
+
 
   <header class="nav">
     <a class="brand" href="index.html">growth</a>
@@ -46,9 +51,7 @@
   <footer class="footer">
     <p>growth — socks & gifts</p>
   </footer>
-
-  <script src="js/shared.js"></script>
-  <script src="js/cart.js"></script>
+<script src="js/cart.js"></script>
 
 <footer class="growth-footer">
     <div class="footer-content">
@@ -80,4 +83,7 @@
 
   <a href="cart.html" class="floating-cart" aria-label="View cart">
     🧺
-    <span id="cartCountFloating" class="
+    <span id="cartCountFloating" class="badge">0</span>
+  </a>
+
+  <script type="module" src="js/banner.js"></script>
