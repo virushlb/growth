@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>growth — categories</title>
+
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/shared.js"></script>
+</head>
+
+<body>
+
+  <!-- Old BF banner (hidden by default) -->
+  <div class="bf-banner" id="bfBanner" style="display:none">
+    <span id="bfText"></span>
+    <span class="bf-close" onclick="document.getElementById('bfBanner').style.display='none'">✕</span>
+  </div>
+
+  <!-- New Promo Banner -->
+  <div id="promoBanner" class="top-banner"></div>
+
+  <!-- Navbar -->
+  <header class="nav">
+    <a class="brand" href="index.html">growth</a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="categories.html" class="active">Categories</a>
+      <a href="index.html#about">About</a>
+    </nav>
+
+    <div class="cart">
+      <a href="cart.html">
+        <span class="cart-icon">🧺</span>
+        <span id="cartCountFloating" class="badge">0</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <main class="page">
+
+    <h1 style="text-align:center; margin-top:40px;">Shop by Category</h1>
+
+    <section class="category-grid" style="
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap:20px;
+      padding:40px 20px;
+      max-width:900px;
+      margin:0 auto;
+    ">
+      <a href="products.html?category=socks" class="category-card" style="
+        background:#fff;
+        padding:20px;
+        border-radius:14px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        text-align:center;
+        text-decoration:none;
+        color:#333;
+        transition:0.25s;
+      ">
+        <h2>Socks 🧦</h2>
+        <p>View all socks</p>
+      </a>
+
+      <a href="products.html?category=gifts" class="category-card" style="
+        background:#fff;
+        padding:20px;
+        border-radius:14px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        text-align:center;
+        text-decoration:none;
+        color:#333;
+        transition:0.25s;
+      ">
+        <h2>Gifts 🎁</h2>
+        <p>View all gifts</p>
+      </a>
+
+      <a href="products.html?category=mugs" class="category-card" style="
+        background:#fff;
+        padding:20px;
+        border-radius:14px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        text-align:center;
+        text-decoration:none;
+        color:#333;
+        transition:0.25s;
+      ">
+        <h2>Mugs ☕</h2>
+        <p>View all mugs</p>
+      </a>
+
+      <a href="products.html?category=accessories" class="category-card" style="
+        background:#fff;
+        padding:20px;
+        border-radius:14px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        text-align:center;
+        text-decoration:none;
+        color:#333;
+        transition:0.25s;
+      ">
+        <h2>Accessories 🔗</h2>
+        <p>View all accessories</p>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="growth-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h2 class="footer-logo-text">GROWTH</h2>
+            <p class="footer-slogan">Gifts that feel good.</p>
+        </div>
+        <div class="footer-section">
+            <h3>Quick Links</h3>
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            
+            <a href="checkout.html">Checkout</a>
+            <a href="cart.html">Cart</a>
+        </div>
+        <div class="footer-section">
+            <h3>Contact</h3>
+            <p>📞 +961 71 209 028</p>
+            <p>📸 <a href="https://www.instagram.com/growth.lbb" target="_blank">@growth.lbb</a></p>
+            <p>💬 WhatsApp: <a href="https://wa.me/96171209028" target="_blank">Order Now</a></p>
+        </div>
+    </div>
+    <div class="footer-credit">
+        © 2025 Growth. All rights reserved. • Developed by
+        <a href="https://virushlb.github.io/virush/" target="_blank">Virush</a>
+    </div>
+  </footer>
+
+  <!-- Floating Cart -->
+  <a href="cart.html" class="floating-cart">
+    🧺
+    <span id="cartCountFloating" class="badge">0</span>
+  </a>
+
+  <!-- Promo Banner Script -->
+  <script type="module" src="js/banner.js"></script>
+
+</body>
+</html>

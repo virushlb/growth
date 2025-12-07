@@ -217,6 +217,12 @@ try {
 
       writeCart(cart);
 
+// Update cart counter immediately
+if (typeof updateCartCount === "function") {
+  updateCartCount();
+}
+
+
       const toast = document.getElementById("toast");
       if (toast) {
         toast.textContent = "Added to cart ✔";

@@ -9,6 +9,9 @@ function renderCart() {
   if (!cart.length) {
     cartItemsEl.innerHTML = '<div class="empty-state">Your cart is empty. Add something from the products page.</div>';
     cartSummaryEl.innerHTML = "";
+    
+    // ⭐ Update cart count when empty
+    if (typeof updateCartCount === "function") updateCartCount();
     return;
   }
 
@@ -68,11 +71,15 @@ function renderCart() {
       Payment on delivery. You can still adjust details on WhatsApp.
     </p>
   `;
+
+  // ⭐ Update cart count after rendering
+  if (typeof updateCartCount === "function") updateCartCount();
 }
 
 if (cartItemsEl && cartSummaryEl) {
   renderCart();
 
+  // CHANGE QTY
   cartItemsEl.addEventListener("change", (e) => {
     const input = e.target.closest(".qty-input");
     if (!input) return;
@@ -91,8 +98,12 @@ if (cartItemsEl && cartSummaryEl) {
     item.qty = value;
     writeCart(cart);
     renderCart();
+
+    // ⭐ Update count after qty change
+    if (typeof updateCartCount === "function") updateCartCount();
   });
 
+  // REMOVE ITEM 
   cartItemsEl.addEventListener("click", (e) => {
     const removeBtn = e.target.closest("button[data-remove]");
     if (!removeBtn) return;
@@ -100,8 +111,12 @@ if (cartItemsEl && cartSummaryEl) {
     let cart = readCart().filter(i => i.id !== id);
     writeCart(cart);
     renderCart();
+
+    // ⭐ Update count after removing
+    if (typeof updateCartCount === "function") updateCartCount();
   });
 
+  // CHECKOUT
   cartSummaryEl.addEventListener("click", (e) => {
     const btn = e.target.closest("#goCheckout");
     if (!btn) return;
