@@ -1,17 +1,16 @@
 // =========================================================
-//  GROWTH — PRODUCTS PAGE JAVASCRIPT (FINAL STABLE VERSION)
+//  GROWTH — PRODUCTS PAGE (FINAL CLEAN VERSION)
 // =========================================================
 
-// -------------------- CONFIG --------------------
+// ---------------------- CONFIG ---------------------------
 const PRODUCTS_TABLE = "products";
 
 const grid = document.getElementById("productsGrid");
 const filterButtons = document.querySelectorAll(".filter-btn");
-const toastEl = document.getElementById("toast");
+const paginationEl = document.getElementById("pagination");
 
 const searchInput = document.getElementById("productSearch");
 const suggestionsEl = document.getElementById("searchSuggestions");
-const paginationEl = document.getElementById("pagination");
 
 let allProducts = [];
 let activeFilter = "all";
@@ -19,22 +18,22 @@ let searchQuery = "";
 let currentPage = 1;
 const PAGE_SIZE = 30;
 
-// -------------------- HELPERS --------------------
+
+// ---------------------- HELPERS ---------------------------
 function unitPrice(p) {
-  return p.discountPrice != null && p.discountPrice < p.price
+  return p.discountPrice && p.discountPrice < p.price
     ? p.discountPrice
     : p.price;
 }
 
-function shuffleInPlace(arr) {
+function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }
 
-// -------------------- LOAD PRODUCTS --------------------
-// -------------------- LOAD PRODUCTS --------------------
+// ---------------------- LOAD PRODUCTS ---------------------
 async function loadProductsFromSupabase() {
   try {
     const { data, error } = await window.supabase
@@ -42,81 +41,65 @@ async function loadProductsFromSupabase() {
       .select("*");
 
     if (error) {
-      console.error("Failed to load products:", error);
-      allProducts = [];
-    } else {
-      allProducts = (data || []).map((row) => ({
-        id: row.id,
-        name: row.name || row.title || "",
-        price:
-          typeof row.price === "number"
-            ? row.price
-            : parseFloat(row.price || "0") || 0,
-        discountPrice:
-          row.discount_price != null
-            ? parseFloat(row.discount_price)
-            : null,
-        category: row.category || "other",
-        description: row.description || "",
-        stock:
-          typeof row.stock === "number"
-            ? row.stock
-            : parseInt(row.stock || "0", 10) || 0,
-        image: row.image_path || null,
-        images:
-          Array.isArray(row.images) && row.images.length
-            ? row.images
-            : row.image_path
-            ? [row.image_path]
-            : [],
-        active: true,
-      }));
-
-      shuffleInPlace(allProducts);
+      console.error("Products load error:", error);
+      return;
     }
-  } catch (err) {
-    console.error("Error loading products:", err);
-    allProducts = [];
-  }
 
-  renderProducts();
+    allProducts = (data || []).map(p => ({
+      id: p.id,
+      name: p.name || p.title || "",
+      description: p.description || "",
+      price: Number(p.price) || 0,
+      discountPrice: p.discount_price ? Number(p.discount_price) : null,
+      stock: Number(p.stock) || 0,
+      category: p.category || "other",
+      image: p.image_path || null,
+      images: Array.isArray(p.images) && p.images.length > 0
+        ? p.images
+        : p.image_path ? [p.image_path] : [],
+    }));
+
+    shuffle(allProducts);
+    renderProducts();
+  } catch (err) {
+    console.error("Unexpected load error:", err);
+  }
 }
 
 
-// -------------------- FILTER + SEARCH + PAGINATION --------------------
+// ---------------------- FILTER / SEARCH --------------------
 function getFilteredProducts() {
-  let filtered = allProducts.filter((p) =>
-    activeFilter === "all" ? true : p.category === activeFilter
-  );
+  let filtered = allProducts;
+
+  if (activeFilter !== "all") {
+    filtered = filtered.filter(p => p.category === activeFilter);
+  }
 
   if (searchQuery.trim()) {
-    const q = searchQuery.trim().toLowerCase();
-    filtered = filtered.filter((p) => {
-      const name = (p.name || "").toLowerCase();
-      const desc = (p.description || "").toLowerCase();
-      return name.includes(q) || desc.includes(q);
-    });
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(p =>
+      (p.name || "").toLowerCase().includes(q) ||
+      (p.description || "").toLowerCase().includes(q)
+    );
   }
 
   return filtered;
 }
 
+
+// ---------------------- PAGINATION -------------------------
 function renderPagination(totalPages) {
   if (totalPages <= 1) {
     paginationEl.innerHTML = "";
     return;
   }
 
-  let html = "";
-  for (let i = 1; i <= totalPages; i++) {
-    html += `<button class="page-btn${
-      i === currentPage ? " active" : ""
-    }" data-page="${i}">${i}</button>`;
-  }
+  paginationEl.innerHTML = Array.from({ length: totalPages }, (_, i) => {
+    const page = i + 1;
+    return `<button class="page-btn ${page === currentPage ? "active" : ""}" data-page="${page}">${page}</button>`;
+  }).join("");
 
-  paginationEl.innerHTML = html;
-
-  paginationEl.querySelectorAll(".page-btn").forEach((btn) => {
+  paginationEl.querySelectorAll(".page-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       currentPage = Number(btn.dataset.page);
       renderProducts();
@@ -125,14 +108,15 @@ function renderPagination(totalPages) {
   });
 }
 
+
+// ---------------------- RENDER PRODUCTS --------------------
 function renderProducts() {
   if (!grid) return;
 
   const filtered = getFilteredProducts();
 
   if (!filtered.length) {
-    grid.innerHTML =
-      '<div class="empty-state">No products found. Try another search.</div>';
+    grid.innerHTML = `<div class="empty-state">No products found.</div>`;
     paginationEl.innerHTML = "";
     return;
   }
@@ -141,70 +125,65 @@ function renderProducts() {
   if (currentPage > totalPages) currentPage = totalPages;
 
   const start = (currentPage - 1) * PAGE_SIZE;
-  const end = start + PAGE_SIZE;
-  const pageItems = filtered.slice(start, end);
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
-  grid.innerHTML = pageItems
-    .map((p) => {
-      const out = p.stock <= 0;
-      const low = p.stock > 0 && p.stock <= 3;
+  grid.innerHTML = pageItems.map(p => {
+    const out = p.stock <= 0;
+    const low = p.stock > 0 && p.stock <= 3;
 
-      let stockLabel = "In stock";
-      let stockClass = "stock-pill";
-      if (low) {
-        stockLabel = `Low: ${p.stock}`;
-        stockClass += " low";
-      }
-      if (out) {
-        stockLabel = "Out of stock";
-        stockClass += " out";
-      }
+    let stockClass = "stock-pill";
+    let stockText = "In stock";
 
-      const hasDiscount =
-        p.discountPrice != null && p.discountPrice < p.price;
-      const priceHtml = hasDiscount
-        ? `<span class="old-price">${p.price}$</span><span class="new-price">${p.discountPrice}$</span>`
-        : `<span class="new-price">${p.price}$</span>`;
+    if (low) {
+      stockClass += " low";
+      stockText = `Low: ${p.stock}`;
+    }
+    if (out) {
+      stockClass += " out";
+      stockText = "Out of stock";
+    }
 
-      const cover =
-        p.image || (p.images && p.images[0]) || "assets/img/sock1.jpg";
+    const hasDiscount = p.discountPrice && p.discountPrice < p.price;
+    const priceHtml = hasDiscount
+      ? `<span class="old-price">${p.price}$</span><span class="new-price">${p.discountPrice}$</span>`
+      : `<span class="new-price">${p.price}$</span>`;
 
-      return `
+    const img = p.image || p.images?.[0] || "assets/img/sock1.jpg";
+
+    return `
       <article class="product-card" data-product-id="${p.id}">
-        <a href="product.html?id=${encodeURIComponent(
-          p.id
-        )}" class="product-link">
+        <a href="product.html?id=${p.id}" class="product-link">
           <div class="product-image-wrap">
-            <span class="${stockClass}">${stockLabel}</span>
-            <img src="${cover}" alt="${p.name}" class="product-image">
+            <span class="${stockClass}">${stockText}</span>
+            <img src="${img}" class="product-image" alt="${p.name}">
           </div>
+
           <div class="product-info">
             <h2 class="product-title">${p.name}</h2>
             <p class="price-line">${priceHtml}</p>
           </div>
         </a>
-        <button class="card-add-btn" data-id="${p.id}" ${
-        out ? "disabled" : ""
-      }>+</button>
+
+        <button class="card-add-btn" data-id="${p.id}" ${out ? "disabled" : ""}>+</button>
       </article>
-      `;
-    })
-    .join("");
+    `;
+  }).join("");
 
   renderPagination(totalPages);
 }
-// -------------------- CART STORAGE --------------------
 
-// -------------------- CART ADD LOGIC --------------------
+
+// ---------------------- ADD TO CART ------------------------
 function handleAddToCart(id) {
-  const product = allProducts.find((p) => p.id == id);
+  const product = allProducts.find(p => p.id == id);
   if (!product) return;
 
   const cart = readCart();
-  const existing = cart.find((item) => item.id == id);
+  const existing = cart.find(item => item.id == id);
+
   const nextQty = existing ? existing.qty + 1 : 1;
 
-  if (product.stock != null && nextQty > product.stock) {
+  if (product.stock && nextQty > product.stock) {
     showToast("Not enough stock.");
     return;
   }
@@ -220,11 +199,10 @@ function handleAddToCart(id) {
       id: product.id,
       name: product.name,
       qty: 1,
-      price: price,
+      price,
       originalPrice: product.price,
-      image:
-        product.image || (product.images && product.images[0]) || "",
       stock: product.stock,
+      image: product.image || product.images?.[0] || "",
     });
   }
 
@@ -233,22 +211,19 @@ function handleAddToCart(id) {
   showToast("Added to cart.");
 }
 
-// -------------------- CART HANDLER FOR PRODUCT GRID --------------------
 function setupGridClick() {
-  grid.addEventListener("click", (e) => {
+  grid.addEventListener("click", e => {
     const btn = e.target.closest(".card-add-btn");
-    if (!btn) return;
-
-    const id = btn.dataset.id;
-    handleAddToCart(id);
+    if (btn) handleAddToCart(btn.dataset.id);
   });
 }
 
-// -------------------- FILTER BUTTONS --------------------
+
+// ---------------------- FILTER BUTTONS ---------------------
 function setupFilters() {
-  filterButtons.forEach((btn) => {
+  filterButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      filterButtons.forEach((b) => b.classList.remove("active"));
+      filterButtons.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
 
       activeFilter = btn.dataset.filter || "all";
@@ -264,12 +239,12 @@ function setupFilters() {
   });
 }
 
-// -------------------- SEARCH SUGGESTIONS --------------------
+
+// ---------------------- SEARCH SUGGESTIONS -----------------
 function renderSuggestions() {
-  if (!suggestionsEl || !searchInput) return;
+  if (!searchInput) return;
 
   const q = searchQuery.trim().toLowerCase();
-
   if (!q) {
     suggestionsEl.style.display = "none";
     suggestionsEl.innerHTML = "";
@@ -277,63 +252,29 @@ function renderSuggestions() {
   }
 
   const matches = allProducts
-    .filter(p => (p.name || "").toLowerCase().includes(q))
+    .filter(p => p.name.toLowerCase().includes(q))
     .slice(0, 10);
 
   if (!matches.length) {
     suggestionsEl.style.display = "none";
-    suggestionsEl.innerHTML = "";
     return;
   }
 
-  suggestionsEl.innerHTML = `
-    <div class="suggestions-header" style="display:flex;justify-content:space-between;align-items:center;">
-      <span>Results</span>
-      <button id="closeSuggestions"
-        style="
-          background:none;
-          border:none;
-          font-size:20px;
-          cursor:pointer;
-          padding:5px;
-          pointer-events:auto;
-          z-index:9999;
-        "
-      >✕</button>
-    </div>
-
-    ${matches.map(p => {
-      const cover = p.image || (p.images?.[0]) || "assets/img/sock1.jpg";
-      return `
-        <div class="suggestion-item" data-id="${p.id}"
-          style="display:flex;align-items:center;gap:10px;padding:10px;">
-          <img src="${cover}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;">
-          <span>${p.name}</span>
-        </div>`;
-    }).join("")}
-  `;
+  suggestionsEl.innerHTML = matches.map(p => {
+    const img = p.image || p.images?.[0];
+    return `
+      <div class="suggestion-item" data-id="${p.id}">
+        <img src="${img}" class="suggestion-thumb">
+        <span>${p.name}</span>
+      </div>
+    `;
+  }).join("");
 
   suggestionsEl.style.display = "block";
-  suggestionsEl.style.pointerEvents = "auto";
-  suggestionsEl.style.zIndex = "999999";
-
-  // FORCE click listener to attach after HTML is created
-  const closeBtn = document.getElementById("closeSuggestions");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      suggestionsEl.innerHTML = "";
-      suggestionsEl.style.display = "none";
-      searchInput.blur();
-    });
-  }
 }
 
-
-
-// -------------------- setup search listeners --------------------
 function setupSearch() {
-  if (!searchInput || !suggestionsEl) return;
+  if (!searchInput) return;
 
   searchInput.addEventListener("input", e => {
     searchQuery = e.target.value.trim();
@@ -342,26 +283,16 @@ function setupSearch() {
   });
 
   suggestionsEl.addEventListener("click", e => {
-    // If user clicked X, ignore suggestion-item logic
-    if (e.target.id === "closeSuggestions") return;
-
     const item = e.target.closest(".suggestion-item");
-    if (item) {
-      window.location.href = `product.html?id=${item.dataset.id}`;
-    }
-  });
-
-  searchInput.addEventListener("focus", () => {
-    if (searchInput.value.trim() !== "") {
-      renderSuggestions();
-    }
+    if (item) window.location.href = `product.html?id=${item.dataset.id}`;
   });
 }
 
-// -------------------- INIT --------------------
+
+// ---------------------- INIT -------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   loadProductsFromSupabase();
-  setupGridClick();
   setupFilters();
   setupSearch();
+  setupGridClick();
 });

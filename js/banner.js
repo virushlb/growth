@@ -1,46 +1,52 @@
-// banner.js — uses global supabase, no imports
+// ==========================
+// GROWTH — PROMO BANNER
+// ==========================
 
-async function loadBanner() {
-  const banner = document.getElementById("promoBanner");
-  if (!banner) return;
+const supabaseClient = window.supabase; // already created in shared.js
 
-  // Use global supabase (already created elsewhere)
-  if (!window.supabase) {
-    console.warn("Supabase client missing.");
-    banner.style.display = "none";
-    return;
+async function loadPromoBanner() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("promo_settings")
+      .select("*")
+      .eq("id", 1)
+      .single();
+
+    if (error) {
+      console.error("Promo fetch error:", error);
+      return;
+    }
+
+    const banner = document.getElementById("promoBanner");
+    if (!banner) return;
+
+    // If inactive → hide
+    if (!data.active) {
+      banner.style.display = "none";
+      return;
+    }
+
+    // Render banner
+    banner.innerHTML = `
+      Use <strong>${data.code}</strong> for <strong>${data.discount}% off</strong>
+      
+    `;
+
+    banner.style.display = "flex";
+
+    // Wait a tiny moment so DOM updates fully
+    setTimeout(() => {
+      const closeBtn = document.getElementById("closeBanner");
+      if (closeBtn) {
+        closeBtn.onclick = () => {
+          banner.style.display = "none";
+        };
+      }
+    }, 50);
+
+  } catch (err) {
+    console.error("Banner load error:", err);
   }
-
-  const { data, error } = await window.supabase
-    .from("promo_settings")
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    banner.style.display = "none";
-    return;
-  }
-
-  const isActive = !!data.is_active;
-  const bannerEnabled =
-    typeof data.banner_enabled === "boolean" ? data.banner_enabled : true;
-
-  const code = (data.code || "").toUpperCase();
-  const percent = data.discount ?? 0;
-
-  if (!isActive || !bannerEnabled || !code || !percent) {
-    banner.style.display = "none";
-    return;
-  }
-
-  banner.innerHTML = `
-    Use code <strong>${code}</strong> for <strong>${percent}% off</strong>
-    <span id="closeBanner">✕</span>
-  `;
-  banner.style.display = "flex";
-
-  const closeBtn = document.getElementById("closeBanner");
-  if (closeBtn) closeBtn.onclick = () => banner.style.display = "none";
 }
 
-document.addEventListener("DOMContentLoaded", loadBanner);
+document.addEventListener("DOMContentLoaded", loadPromoBanner);

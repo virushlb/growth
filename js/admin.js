@@ -10,7 +10,11 @@ let products = [];
 
 async function loadAdminProducts() {
   try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}`, {
+      method: "GET",
       headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json"
       }
     });
     if (!res.ok) {
@@ -280,99 +284,104 @@ if (adminBody) {
   }
 
   if (saveBtn) {
-  saveBtn.addEventListener("click", async () => {
-    collectFromTable();
-    try {
-      // map products to DB rows
-      const rows = products.map(p => ({
-        id: p.id || `p-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        name: p.name,
-        price: p.price ?? 0,
-        discount_price: p.discountPrice != null ? p.discountPrice : null,
-        category: p.category || "",
-        description: p.description || "",
-        image_path: (p.images && p.images[0]) || p.image || null,
-        stock: p.stock ?? 0
-      }));
-
-      // delete all existing products
-        method: "DELETE",
-        headers: {
-        }
-      });
-
-      // insert new set
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Prefer: "return=representation"
-        },
-        body: JSON.stringify(rows)
-      });
-
-      if (!res.ok) {
-        console.error("Failed to save products to Supabase", await res.text());
-        if (statusEl) statusEl.textContent = "Error saving products to Supabase.";
-      } else {
-        const saved = await res.json();
-        // update local ids from Supabase response
-        products = saved.map(row => ({
-          id: row.id,
-          name: row.name || "",
-          price: typeof row.price === "number" ? row.price : parseFloat(row.price || "0") || 0,
-          discountPrice: row.discount_price != null ? (typeof row.discount_price === "number" ? row.discount_price : parseFloat(row.discount_price)) : null,
-          category: row.category || "",
-          description: row.description || "",
-          stock: typeof row.stock === "number" ? row.stock : parseInt(row.stock || "0", 10) || 0,
-          image: row.image_path || null,
-          images: row.image_path ? [row.image_path] : [],
-          active: true
+    saveBtn.addEventListener("click", async () => {
+      collectFromTable();
+      try {
+        // map products to DB rows
+        const rows = products.map(p => ({
+          id: p.id || `p-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: p.name,
+          price: p.price ?? 0,
+          discount_price: p.discountPrice != null ? p.discountPrice : null,
+          category: p.category || "",
+          description: p.description || "",
+          image_path: (p.images && p.images[0]) || p.image || null,
+          stock: p.stock ?? 0
         }));
-        renderAdminTable();
-        if (statusEl) statusEl.textContent = "Saved to Supabase. Refresh products page to see changes.";
-      }
-    } catch (err) {
-      console.error("Unexpected error saving products", err);
-      if (statusEl) statusEl.textContent = "Unexpected error saving products.";
-    }
-  });
-}
 
+        // delete all existing products
+        await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}`, {
+          method: "DELETE",
+          headers: {
+            "apikey": SUPABASE_KEY
+          }
+        });
+
+        // insert new set
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Content-Type": "application/json",
+            Prefer: "return=representation"
+          },
+          body: JSON.stringify(rows)
+        });
+
+        if (!res.ok) {
+          console.error("Failed to save products to Supabase", await res.text());
+          if (statusEl) statusEl.textContent = "Error saving products to Supabase.";
+        } else {
+          const saved = await res.json();
+          // update local ids from Supabase response
+          products = saved.map(row => ({
+            id: row.id,
+            name: row.name || "",
+            price: typeof row.price === "number" ? row.price : parseFloat(row.price || "0") || 0,
+            discountPrice: row.discount_price != null ? (typeof row.discount_price === "number" ? row.discount_price : parseFloat(row.discount_price)) : null,
+            category: row.category || "",
+            description: row.description || "",
+            stock: typeof row.stock === "number" ? row.stock : parseInt(row.stock || "0", 10) || 0,
+            image: row.image_path || null,
+            images: row.image_path ? [row.image_path] : [],
+            active: true
+          }));
+          renderAdminTable();
+          if (statusEl) statusEl.textContent = "Saved to Supabase. Refresh products page to see changes.";
+        }
+      } catch (err) {
+        console.error("Unexpected error saving products", err);
+        if (statusEl) statusEl.textContent = "Unexpected error saving products.";
+      }
+    });
+  }
 
   if (resetBtn) {
-  resetBtn.addEventListener("click", async () => {
-    products = defaultProducts();
-    try {
-      const rows = products.map(p => ({
-        id: p.id || `p-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        name: p.name,
-        price: p.price ?? 0,
-        discount_price: p.discountPrice != null ? p.discountPrice : null,
-        category: p.category || "",
-        description: p.description || "",
-        image_path: (p.images && p.images[0]) || p.image || null,
-        stock: p.stock ?? 0
-      }));
-        method: "DELETE",
-        headers: {
-        }
-      });
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Prefer: "return=minimal"
-        },
-        body: JSON.stringify(rows)
-      });
-      renderAdminTable();
-      if (statusEl) statusEl.textContent = "Demo data restored to Supabase.";
-    } catch (err) {
-      console.error("Error resetting demo data", err);
-      if (statusEl) statusEl.textContent = "Error restoring demo data.";
-    }
-  });
-}
-
+    resetBtn.addEventListener("click", async () => {
+      try {
+        const rows = products.map(p => ({
+          id: p.id || `p-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: p.name,
+          price: p.price ?? 0,
+          discount_price: p.discountPrice != null ? p.discountPrice : null,
+          category: p.category || "",
+          description: p.description || "",
+          image_path: (p.images && p.images[0]) || p.image || null,
+          stock: p.stock ?? 0
+        }));
+        await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}`, {
+          method: "DELETE",
+          headers: {
+            "apikey": SUPABASE_KEY
+          }
+        });
+        await fetch(`${SUPABASE_URL}/rest/v1/${PRODUCTS_TABLE}`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal"
+          },
+          body: JSON.stringify(rows)
+        });
+        renderAdminTable();
+        if (statusEl) statusEl.textContent = "Demo data restored to Supabase.";
+      } catch (err) {
+        console.error("Error resetting demo data", err);
+        if (statusEl) statusEl.textContent = "Error restoring demo data.";
+      }
+    });
+  }
 }
 
 

@@ -86,6 +86,8 @@ async function fetchOrders() {
   if (ordersStatus) ordersStatus.textContent = "";
 
   try {
+    const res = await fetch(`/api/orders`, {
+      method: "GET",
       headers: {
       },
     });
@@ -165,6 +167,7 @@ async function fetchOrders() {
       confirmBtn.textContent = "Mark confirmed";
       confirmBtn.addEventListener("click", async () => {
         try {
+          const res = await fetch(`/api/orders/${order.id}`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
@@ -194,9 +197,10 @@ async function fetchOrders() {
       deleteBtn.addEventListener("click", async () => {
         if (!confirm("Delete this order?")) return;
         try {
+          const res = await fetch(`/api/orders/${order.id}`, {
             method: "DELETE",
             headers: {
-              Prefer: "return-minimal",
+              Prefer: "return=minimal",
             },
           });
           if (!res.ok) {

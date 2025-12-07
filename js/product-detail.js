@@ -22,25 +22,20 @@ async function renderProductDetail() {
   let products = [];
   let product = null;
 
-  try {
-      headers: {
-      }
-    });
+try {
+    const { data, error } = await window.supabase
+      .from(PRODUCTS_TABLE)
+      .select("*");
 
-    if (!res.ok) {
-      console.error("Failed to load product detail", await res.text());
+    if (error) {
+      console.error("Failed to load product detail:", error);
     } else {
-      const data = await res.json();
-
-      // FIXED VERSION — MULTI-IMAGES LOADED CORRECTLY
       products = (data || []).map(row => ({
         id: row.id,
         name: row.name || "",
         price: typeof row.price === "number" ? row.price : parseFloat(row.price || "0") || 0,
         discountPrice: row.discount_price != null
-          ? (typeof row.discount_price === "number"
-              ? row.discount_price
-              : parseFloat(row.discount_price))
+          ? (typeof row.discount_price === "number" ? row.discount_price : parseFloat(row.discount_price))
           : null,
         category: row.category || "other",
         description: row.description || "",
@@ -48,14 +43,13 @@ async function renderProductDetail() {
           ? row.stock
           : parseInt(row.stock || "0", 10) || 0,
         image: row.image_path || null,
-        images:
-          Array.isArray(row.images) && row.images.length
-            ? row.images
-            : (row.image_path ? [row.image_path] : []),
+        images: Array.isArray(row.images) && row.images.length
+          ? row.images
+          : (row.image_path ? [row.image_path] : []),
         active: true
       }));
 
-      product = products.find(p => p.id === id) || products[0];
+      product = products.find(p => p.id == id);
     }
   } catch (err) {
     console.error("Error loading product detail from Supabase", err);

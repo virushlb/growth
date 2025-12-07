@@ -1453,3 +1453,15 @@ body.admin-body {
   }
   .nav{ margin-top:45px !important; }
 }
+#promoBanner {
+  position: relative;
+  z-index: 99999 !important;
+  cursor: default;
+}
+
+#closeBanner {
+  position: relative;
+  z-index: 999999 !important;
+  cursor: pointer;
+  padding: 5px 10px;
+}
