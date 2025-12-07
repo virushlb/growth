@@ -20,30 +20,29 @@ async function loadPromoBanner() {
     const banner = document.getElementById("promoBanner");
     if (!banner) return;
 
-    // If inactive → hide
-    if (!data.active) {
-      banner.style.display = "none";
+    // If inactive OR banner explicitly disabled → hide completely
+    const isActive =
+      data && typeof data.active === "boolean" ? data.active : !!data?.is_active;
+    const bannerEnabled =
+      data && typeof data.banner_enabled === "boolean"
+        ? data.banner_enabled
+        : true;
+
+    if (!isActive || !bannerEnabled) {
+      banner.innerHTML = "";
+      banner.style.setProperty("display", "none", "important");
       return;
     }
 
-    // Render banner
+    // Render banner (percent-only, black bar, site-wide)
+    const code = (data.code || "").toUpperCase();
+    const discount = data.discount ?? "";
+
     banner.innerHTML = `
-      Use <strong>${data.code}</strong> for <strong>${data.discount}% off</strong>
-      
+      Use <strong>${code}</strong> for <strong>${discount}% off</strong>
     `;
 
-    banner.style.display = "flex";
-
-    // Wait a tiny moment so DOM updates fully
-    setTimeout(() => {
-      const closeBtn = document.getElementById("closeBanner");
-      if (closeBtn) {
-        closeBtn.onclick = () => {
-          banner.style.display = "none";
-        };
-      }
-    }, 50);
-
+    banner.style.setProperty("display", "flex", "important");
   } catch (err) {
     console.error("Banner load error:", err);
   }
